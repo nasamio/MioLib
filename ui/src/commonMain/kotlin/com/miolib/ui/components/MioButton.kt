@@ -26,7 +26,6 @@ fun MioButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    // 核心点：默认值引用 MioTheme，保证一致性；同时暴露参数，保证灵活性
     backgroundColor: Color = MioTheme.colors.primary,
     textColor: Color = MioTheme.colors.onPrimary,
 ) {
