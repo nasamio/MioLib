@@ -9,7 +9,7 @@ plugins {
 
 // 1. 定义库的坐标 (其他项目引用时会用到)
 group = "com.hzz.miolib"
-version = "1.0.0"
+version = "1.0.2"
 
 kotlin {
     androidTarget {
