@@ -12,20 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 import com.miolib.ui.theme.MioTheme
 
-/**
- * MioTopBar: 通用顶部标题栏
- * 采用居中标题设计，左侧可选返回键，右侧可扩展操作按钮。
- *
- * @param title 中间显示的标题文字
- * @param modifier 外部修饰符
- * @param onBackClick 左侧返回按钮的点击回调。如果不传(null)，则不显示返回箭头。
- * @param actions 右侧的操作按钮区域（例如设置、保存按钮）。使用 RowScope，可以放多个 IconButton。
- * @param backgroundColor 背景颜色，默认跟随 Theme.background
- * @param contentColor 内容颜色（图标和文字），默认跟随 Theme.onBackground
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MioTopBar(
@@ -40,13 +28,13 @@ fun MioTopBar(
         title = {
             MioText(
                 text = title,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold, // 标题加粗更明显
+                // 修改：不再写死 18.sp，而是使用 TitleMedium
+                style = MioTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
                 color = contentColor
             )
         },
         modifier = modifier,
-        // 导航图标区域 (左侧)
         navigationIcon = {
             if (onBackClick != null) {
                 IconButton(onClick = onBackClick) {
@@ -58,7 +46,6 @@ fun MioTopBar(
                 }
             }
         },
-        // 操作图标区域 (右侧)
         actions = actions,
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = backgroundColor,

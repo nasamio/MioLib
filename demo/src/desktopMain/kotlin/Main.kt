@@ -1,110 +1,209 @@
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings // 只是示例图标
-import androidx.compose.material.icons.filled.Star // 只是示例图标
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import com.miolib.ui.components.* // 导入所有组件
-import com.miolib.ui.theme.MioTheme
+import com.miolib.ui.components.*
+import com.miolib.ui.theme.*
 
 fun main() = application {
-    Window(onCloseRequest = ::exitApplication, title = "MioLib 动态预览") {
+    Window(onCloseRequest = ::exitApplication, title = "MioLib 全组件终极测试") {
 
-        // --- 1. 定义全局状态 ---
-        // 这个变量控制整个 Demo 是深色还是浅色
+        // --- 控制台状态 ---
         var isDarkTheme by remember { mutableStateOf(false) }
+        var useAndroidSize by remember { mutableStateOf(false) }
+        var useSquareShape by remember { mutableStateOf(false) }
 
-        // 演示用的组件状态
-        var textValue by remember { mutableStateOf("") }
-        var isSwitchOn by remember { mutableStateOf(false) }
+        // --- 组件交互状态 ---
+        var inputText by remember { mutableStateOf("") }
+        var isSwitchOn by remember { mutableStateOf(true) }
+        var isChecked by remember { mutableStateOf(false) }
+        var radioOption by remember { mutableStateOf(0) }
+        var showDialog by remember { mutableStateOf(false) }
+        var clickCount by remember { mutableStateOf(0) }
 
-        // --- 2. 顶层包裹 Theme，并将状态传入 ---
-        MioTheme(darkTheme = isDarkTheme) {
+        val currentSizes = if (useAndroidSize) AndroidSizes else DesktopSizes
+        val currentShapes = if (useSquareShape) SquareShapes else RoundedShapes
 
-            // --- 3. 使用 MioScaffold 构建页面结构 ---
+        MioTheme(
+            darkTheme = isDarkTheme,
+            sizes = currentSizes,
+            shapes = currentShapes
+        ) {
             MioScaffold(
                 topBar = {
                     MioTopBar(
-                        title = if (isDarkTheme) "深色模式" else "浅色模式",
-                        // 左侧返回按钮模拟
-                        onBackClick = { println("点击了返回") },
-                        // 右侧放置一个主题切换开关
+                        title = "组件全家桶",
                         actions = {
-                            // 这里放一个简单的 Switch 来控制主题
-                            MioSwitch(
-                                checked = isDarkTheme,
-                                onCheckedChange = { isDarkTheme = it }
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
+                            MioText("夜间", style = MioTheme.typography.caption)
+                            Spacer(Modifier.width(8.dp))
+                            MioSwitch(checked = isDarkTheme, onCheckedChange = { isDarkTheme = it })
+                            Spacer(Modifier.width(16.dp))
                         }
                     )
                 }
-            ) { padding -> // 获取 padding，防止内容被 TopBar 遮挡
-
-                // --- 4. 页面内容区域 ---
+            ) { padding ->
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding) // 关键：应用 Scaffold 给的 padding
-                        .padding(24.dp)   // 额外的内部间距
+                        .padding(padding)
+                        .verticalScroll(rememberScrollState())
+                        .padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
 
-                    // 区域 1：展示表单
+                    // --- 0. 全局控制台 ---
                     MioCard {
-                        MioText("基础组件测试", fontSize = 16.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        MioInput(
-                            value = textValue,
-                            onValueChange = { textValue = it },
-                            label = "测试输入框",
-                            placeholder = "输入点什么看看..."
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
+                        MioText("样式控制台", style = MioTheme.typography.titleMedium)
+                        Spacer(Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            MioText("去除阴影后的开关：")
-                            Spacer(modifier = Modifier.width(8.dp))
-                            // 测试新的开关
-                            MioSwitch(checked = isSwitchOn, onCheckedChange = { isSwitchOn = it })
+                            MioSwitch(checked = useAndroidSize, onCheckedChange = { useAndroidSize = it })
+                            Spacer(Modifier.width(8.dp))
+                            MioText("安卓尺寸 (Touch)", style = MioTheme.typography.body)
+
+                            Spacer(Modifier.width(24.dp))
+
+                            MioSwitch(checked = useSquareShape, onCheckedChange = { useSquareShape = it })
+                            Spacer(Modifier.width(8.dp))
+                            MioText("直角风格 (Square)", style = MioTheme.typography.body)
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // 区域 2：展示标签和进度
+                    // --- 1. Typography 排版 ---
                     MioCard {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            MioText("状态展示")
-                            // 动态改变标签颜色
-                            MioTag(text = if(isSwitchOn) "已开启" else "已关闭")
-                        }
+                        MioText("1. 排版系统 (Typography)", style = MioTheme.typography.titleMedium)
+                        HorizontalDivider(Modifier.padding(vertical = 8.dp), color = MioTheme.colors.outline.copy(alpha = 0.2f))
 
-                        Spacer(modifier = Modifier.height(20.dp))
-
-                        MioText("加载中...", fontSize = 12.sp, color = MioTheme.colors.outline)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        MioLinearProgress(progress = 0.45f)
+                        MioText("Display Title", style = MioTheme.typography.display)
+                        MioText("Title Large", style = MioTheme.typography.titleLarge)
+                        MioText("Title Medium", style = MioTheme.typography.titleMedium)
+                        MioText("Body Text: 正文内容，清晰易读。", style = MioTheme.typography.body)
+                        MioText("Label Text", style = MioTheme.typography.label)
+                        MioText("Caption Text: 辅助说明文字", style = MioTheme.typography.caption, color = MioTheme.colors.outline)
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    // --- 2. 按钮与尺寸 (Button) ---
+                    MioCard {
+                        MioText("2. 按钮 (Sizes: S/M/L)", style = MioTheme.typography.titleMedium)
+                        Spacer(Modifier.height(16.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            MioButton(text = "Small", size = MioSize.Small, onClick = {})
+                            Spacer(Modifier.width(8.dp))
+                            MioButton(text = "Medium", size = MioSize.Medium, onClick = {})
+                            Spacer(Modifier.width(8.dp))
+                            MioButton(text = "Large", size = MioSize.Large, onClick = {})
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        MioButton(text = "Disabled", enabled = false, onClick = {})
+                    }
 
-                    // 区域 3：按钮测试
+                    // --- 3. 输入框 (Input) ---
+                    MioCard {
+                        MioText("3. 输入框 (Sizes: S/M/L)", style = MioTheme.typography.titleMedium)
+                        Spacer(Modifier.height(16.dp))
+                        MioInput(value = "", onValueChange = {}, placeholder = "Small", size = MioSize.Small)
+                        Spacer(Modifier.height(8.dp))
+                        MioInput(value = "", onValueChange = {}, placeholder = "Medium (Default)", size = MioSize.Medium)
+                        Spacer(Modifier.height(8.dp))
+                        MioInput(value = "", onValueChange = {}, placeholder = "Large", size = MioSize.Large)
+                    }
+
+                    // --- 4. 标签与头像 (Tag & Avatar) ---
+                    MioCard {
+                        MioText("4. 标签与头像", style = MioTheme.typography.titleMedium)
+                        Spacer(Modifier.height(16.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            MioAvatar("A", size = 48.dp)
+                            Spacer(Modifier.width(16.dp))
+                            MioAvatar("B", size = 32.dp, backgroundColor = MioTheme.colors.outline)
+                            Spacer(Modifier.width(24.dp))
+                            MioTag("Primary Tag")
+                            Spacer(Modifier.width(8.dp))
+                            MioTag("Tag 2", backgroundColor = MioTheme.colors.outline.copy(alpha = 0.2f), textColor = MioTheme.colors.onSurface)
+                        }
+                    }
+
+                    // --- 5. 选择控件 (Selection) ---
+                    MioCard {
+                        MioText("5. 选择控件", style = MioTheme.typography.titleMedium)
+                        Spacer(Modifier.height(8.dp))
+
+                        MioListItem(
+                            headline = "Switch",
+                            trailingContent = { MioSwitch(checked = isSwitchOn, onCheckedChange = { isSwitchOn = it }) }
+                        )
+                        HorizontalDivider(color = MioTheme.colors.outline.copy(alpha = 0.1f))
+
+                        MioListItem(
+                            headline = "CheckBox",
+                            trailingContent = { MioCheckBox(checked = isChecked, onCheckedChange = { isChecked = it }) },
+                            onClick = { isChecked = !isChecked }
+                        )
+                        HorizontalDivider(color = MioTheme.colors.outline.copy(alpha = 0.1f))
+
+                        MioListItem(
+                            headline = "Radio Group",
+                            trailingContent = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    MioRadioButton(selected = radioOption == 0, onClick = { radioOption = 0 })
+                                    MioText("A", style = MioTheme.typography.body)
+                                    Spacer(Modifier.width(8.dp))
+                                    MioRadioButton(selected = radioOption == 1, onClick = { radioOption = 1 })
+                                    MioText("B", style = MioTheme.typography.body)
+                                }
+                            }
+                        )
+                    }
+
+                    // --- 6. 状态指示 (Progress) ---
+                    MioCard {
+                        MioText("6. 状态指示", style = MioTheme.typography.titleMedium)
+                        Spacer(Modifier.height(16.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            MioLoading(size = 24.dp)
+                            Spacer(Modifier.width(16.dp))
+                            MioLinearProgress(progress = 0.7f, modifier = Modifier.weight(1f))
+                            Spacer(Modifier.width(8.dp))
+                            MioText("70%", style = MioTheme.typography.caption)
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        MioLinearProgress(modifier = Modifier.fillMaxWidth()) // Indeterminate
+                    }
+
+                    // --- 7. 列表与交互 (ListItem & Dialog) ---
+                    MioCard(onClick = { clickCount++ }) {
+                        MioListItem(
+                            headline = "7. 可点击卡片 & 列表",
+                            supportText = "点击此卡片测试水波纹: $clickCount",
+                            leadingContent = { Icon(Icons.Default.Home, null, tint = MioTheme.colors.primary) },
+                            trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = MioTheme.colors.outline) }
+                        )
+                    }
+
                     MioButton(
-                        text = "切换主题 (也可以点这里)",
-                        onClick = { isDarkTheme = !isDarkTheme }, // 按钮也能控制主题
-                        modifier = Modifier.fillMaxWidth()
+                        text = "8. 弹出对话框 (Dialog)",
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { showDialog = true }
+                    )
+                }
+
+                // --- 弹窗逻辑 ---
+                if (showDialog) {
+                    MioDialog(
+                        onDismissRequest = { showDialog = false },
+                        title = "确认操作",
+                        text = "您正在调用 MioDialog 组件。该组件已适配当前的 Typography 和 Shape 设置。",
+                        onConfirm = { showDialog = false }
                     )
                 }
             }
