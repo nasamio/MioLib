@@ -4,10 +4,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -82,14 +84,21 @@ fun main() = application {
                     // --- 1. Typography 排版 ---
                     MioCard {
                         MioText("1. 排版系统 (Typography)", style = MioTheme.typography.titleMedium)
-                        HorizontalDivider(Modifier.padding(vertical = 8.dp), color = MioTheme.colors.outline.copy(alpha = 0.2f))
+                        HorizontalDivider(
+                            Modifier.padding(vertical = 8.dp),
+                            color = MioTheme.colors.outline.copy(alpha = 0.2f)
+                        )
 
                         MioText("Display Title", style = MioTheme.typography.display)
                         MioText("Title Large", style = MioTheme.typography.titleLarge)
                         MioText("Title Medium", style = MioTheme.typography.titleMedium)
                         MioText("Body Text: 正文内容，清晰易读。", style = MioTheme.typography.body)
                         MioText("Label Text", style = MioTheme.typography.label)
-                        MioText("Caption Text: 辅助说明文字", style = MioTheme.typography.caption, color = MioTheme.colors.outline)
+                        MioText(
+                            "Caption Text: 辅助说明文字",
+                            style = MioTheme.typography.caption,
+                            color = MioTheme.colors.outline
+                        )
                     }
 
                     // --- 2. 按钮与尺寸 (Button) ---
@@ -113,7 +122,12 @@ fun main() = application {
                         Spacer(Modifier.height(16.dp))
                         MioInput(value = "", onValueChange = {}, placeholder = "Small", size = MioSize.Small)
                         Spacer(Modifier.height(8.dp))
-                        MioInput(value = "", onValueChange = {}, placeholder = "Medium (Default)", size = MioSize.Medium)
+                        MioInput(
+                            value = "",
+                            onValueChange = {},
+                            placeholder = "Medium (Default)",
+                            size = MioSize.Medium
+                        )
                         Spacer(Modifier.height(8.dp))
                         MioInput(value = "", onValueChange = {}, placeholder = "Large", size = MioSize.Large)
                     }
@@ -129,7 +143,11 @@ fun main() = application {
                             Spacer(Modifier.width(24.dp))
                             MioTag("Primary Tag")
                             Spacer(Modifier.width(8.dp))
-                            MioTag("Tag 2", backgroundColor = MioTheme.colors.outline.copy(alpha = 0.2f), textColor = MioTheme.colors.onSurface)
+                            MioTag(
+                                "Tag 2",
+                                backgroundColor = MioTheme.colors.outline.copy(alpha = 0.2f),
+                                textColor = MioTheme.colors.onSurface
+                            )
                         }
                     }
 
@@ -146,7 +164,11 @@ fun main() = application {
 
                         MioListItem(
                             headline = "CheckBox",
-                            trailingContent = { MioCheckBox(checked = isChecked, onCheckedChange = { isChecked = it }) },
+                            trailingContent = {
+                                MioCheckBox(
+                                    checked = isChecked,
+                                    onCheckedChange = { isChecked = it })
+                            },
                             onClick = { isChecked = !isChecked }
                         )
                         HorizontalDivider(color = MioTheme.colors.outline.copy(alpha = 0.1f))
@@ -186,7 +208,13 @@ fun main() = application {
                             headline = "7. 可点击卡片 & 列表",
                             supportText = "点击此卡片测试水波纹: $clickCount",
                             leadingContent = { Icon(Icons.Default.Home, null, tint = MioTheme.colors.primary) },
-                            trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = MioTheme.colors.outline) }
+                            trailingContent = {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                    null,
+                                    tint = MioTheme.colors.outline
+                                )
+                            }
                         )
                     }
 

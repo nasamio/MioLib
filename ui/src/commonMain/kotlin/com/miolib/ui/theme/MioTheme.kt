@@ -29,6 +29,28 @@ data class MioColors(
     val outline: Color
 )
 
+// --- Light Mode: Mio Blue (回归你喜欢的静谧蓝) ---
+val LightColors = MioColors(
+    primary = Color(0xFF3B82F6),      // 经典的静谧蓝
+    onPrimary = Color(0xFFFFFFFF),    // 蓝底白字
+    background = Color(0xFFF3F4F6),   // 护眼的淡灰蓝背景
+    onBackground = Color(0xFF111827), // 深灰近黑
+    surface = Color(0xFFFFFFFF),      // 纯白卡片
+    onSurface = Color(0xFF1F2937),    // 卡片文字深灰
+    outline = Color(0xFF9CA3AF)       // 浅灰边框
+)
+
+// --- Dark Mode: Deep Cyber (基于你的截图提取的深空青) ---
+val DarkColors = MioColors(
+    primary = Color(0xFF00E5FF),      // 高亮青色 (在深色背景极具科技感)
+    onPrimary = Color(0xFF000000),    // 青底黑字
+    background = Color(0xFF0F172A),   // 午夜深蓝灰 (比纯黑更有质感)
+    onBackground = Color(0xFFF1F5F9), // 亮灰白文字
+    surface = Color(0xFF1E293B),      // 稍微亮一点的深蓝灰卡片
+    onSurface = Color(0xFFE2E8F0),    // 卡片文字灰白
+    outline = Color(0xFF334155)       // 深色边框
+)
+
 // --- 2. 尺寸系统 ---
 @Immutable
 data class MioSizes(
@@ -53,123 +75,78 @@ data class MioShapes(
     val cornerLarge: Shape
 )
 
-// --- 4. 新增：排版系统 (Typography) ---
+// --- 4. 排版系统 ---
 @Immutable
 data class MioTypography(
-    val display: TextStyle,  // 巨型标题 (如数字展示)
-    val titleLarge: TextStyle, // 页面一级标题
-    val titleMedium: TextStyle, // 卡片/模块标题
-    val body: TextStyle,       // 正文
-    val label: TextStyle,      // 按钮/标签文字 (通常加粗)
-    val caption: TextStyle     // 辅助说明文字 (小号)
+    val display: TextStyle,
+    val titleLarge: TextStyle,
+    val titleMedium: TextStyle,
+    val body: TextStyle,
+    val label: TextStyle,
+    val caption: TextStyle
 )
 
-// --- 预设值 ---
+// --- 预设值配置 ---
 
-val LightColors = MioColors(
-    primary = Color(0xFF3B82F6),
-    onPrimary = Color(0xFFFFFFFF),
-    background = Color(0xFFF3F4F6),
-    onBackground = Color(0xFF111827),
-    surface = Color(0xFFFFFFFF),
-    onSurface = Color(0xFF1F2937),
-    outline = Color(0xFF9CA3AF)
-)
-
-val DarkColors = MioColors(
-    primary = Color(0xFF60A5FA),
-    onPrimary = Color(0xFF0F172A),
-    background = Color(0xFF0F172A),
-    onBackground = Color(0xFFF9FAFB),
-    surface = Color(0xFF1E293B),
-    onSurface = Color(0xFFE2E8F0),
-    outline = Color(0xFF475569)
-)
-
+// 桌面端尺寸 (紧凑)
 val DesktopSizes = MioSizes(
-    small = SizeSpec(24.dp, 8.dp, 12.sp, 14.dp),
-    medium = SizeSpec(32.dp, 16.dp, 14.sp, 18.dp),
-    large = SizeSpec(40.dp, 24.dp, 16.sp, 22.dp)
+    small = SizeSpec(28.dp, 10.dp, 12.sp, 14.dp),
+    medium = SizeSpec(36.dp, 16.dp, 14.sp, 18.dp),
+    large = SizeSpec(44.dp, 24.dp, 16.sp, 22.dp)
 )
 
+// 安卓端尺寸 (触摸友好)
 val AndroidSizes = MioSizes(
-    small = SizeSpec(32.dp, 12.dp, 12.sp, 16.dp),
+    small = SizeSpec(36.dp, 12.dp, 12.sp, 16.dp),
     medium = SizeSpec(48.dp, 20.dp, 16.sp, 24.dp),
     large = SizeSpec(56.dp, 28.dp, 18.sp, 28.dp)
 )
 
+// 形状 (圆润风格，贴合你的截图)
 val RoundedShapes = MioShapes(
-    cornerSmall = RoundedCornerShape(4.dp),
-    cornerMedium = RoundedCornerShape(8.dp),
-    cornerLarge = RoundedCornerShape(16.dp)
+    cornerSmall = RoundedCornerShape(6.dp),
+    cornerMedium = RoundedCornerShape(12.dp),
+    cornerLarge = RoundedCornerShape(20.dp)
 )
 
+// 形状 (直角风格)
 val SquareShapes = MioShapes(
     cornerSmall = RoundedCornerShape(0.dp),
     cornerMedium = RoundedCornerShape(2.dp),
     cornerLarge = RoundedCornerShape(0.dp)
 )
 
-// 定义一套基础的排版规范
+// 排版规范
 val DefaultTypography = MioTypography(
-    display = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Bold,
-        fontSize = 36.sp,
-        lineHeight = 44.sp
-    ),
-    titleLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Bold,
-        fontSize = 22.sp,
-        lineHeight = 28.sp
-    ),
-    titleMedium = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Bold,
-        fontSize = 18.sp,
-        lineHeight = 24.sp
-    ),
-    body = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 14.sp,
-        lineHeight = 20.sp
-    ),
-    label = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
-        lineHeight = 20.sp
-    ),
-    caption = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 12.sp,
-        lineHeight = 16.sp
-    )
+    display = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Bold, fontSize = 36.sp, lineHeight = 44.sp),
+    titleLarge = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Bold, fontSize = 22.sp, lineHeight = 28.sp),
+    titleMedium = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Bold, fontSize = 18.sp, lineHeight = 24.sp),
+    body = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp),
+    label = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 20.sp),
+    caption = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal, fontSize = 12.sp, lineHeight = 16.sp)
 )
 
 // --- CompositionLocal 管道 ---
 val LocalMioColors = staticCompositionLocalOf { LightColors }
 val LocalMioSizes = staticCompositionLocalOf { DesktopSizes }
 val LocalMioShapes = staticCompositionLocalOf { RoundedShapes }
-val LocalMioTypography = staticCompositionLocalOf { DefaultTypography } // 新增管道
+val LocalMioTypography = staticCompositionLocalOf { DefaultTypography }
 
 @Composable
 fun MioTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    // 逻辑：如果 darkTheme 为真，使用 DarkColors (深空青)；否则使用 LightColors (静谧蓝)
     colors: MioColors = if (darkTheme) DarkColors else LightColors,
     sizes: MioSizes = MioTheme.sizes,
     shapes: MioShapes = MioTheme.shapes,
-    typography: MioTypography = DefaultTypography, // 新增参数
+    typography: MioTypography = DefaultTypography,
     content: @Composable () -> Unit
 ) {
     CompositionLocalProvider(
         LocalMioColors provides colors,
         LocalMioSizes provides sizes,
         LocalMioShapes provides shapes,
-        LocalMioTypography provides typography // 注入
+        LocalMioTypography provides typography
     ) {
         content()
     }
