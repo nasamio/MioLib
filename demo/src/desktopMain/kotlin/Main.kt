@@ -45,7 +45,7 @@ fun main() = application {
             MioScaffold(
                 topBar = {
                     MioTopBar(
-                        title = "组件全家桶",
+                        title = "MioLib Compose组件全家桶",
                         actions = {
                             MioText("夜间", style = MioTheme.typography.caption)
                             Spacer(Modifier.width(8.dp))
