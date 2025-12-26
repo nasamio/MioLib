@@ -1,5 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,7 +19,7 @@ import com.miolib.ui.theme.*
 import kotlinx.coroutines.launch
 
 fun main() = application {
-    Window(onCloseRequest = ::exitApplication, title = "MioLib 全组件终极测试 v2.0") {
+    Window(onCloseRequest = ::exitApplication, title = "MioLib 全组件终极测试 v2.1") {
 
         // --- 全局配置与状态 ---
         var isDarkTheme by remember { mutableStateOf(false) }
@@ -385,6 +386,74 @@ fun main() = application {
                                     size = 80.dp,
                                     contentDescription = "Landscape",
                                     cornerRadius = 40.dp
+                                )
+                            }
+                        }
+
+                        // --- Part 11: 设置页组件 (Settings) ---
+                        MioCard {
+                            MioText("11. 设置页组件 (Settings)", style = MioTheme.typography.titleMedium)
+                            // 背景设为稍微浅一点的颜色模拟设置页区域
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(MioTheme.colors.background.copy(alpha = 0.3f), MioTheme.shapes.cornerMedium)
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                // 1. 分类与跳转
+                                MioSettingCategory("连接与共享")
+                                MioSettingNavigation(
+                                    title = "无线局域网",
+                                    info = "Mio_5G",
+                                    // 注意：如果没有 Icons.Filled.Wifi，使用通用图标 Share 代替以防报错
+                                    icon = Icons.Default.Share,
+                                    onClick = { scope.launch { snackbarHostState.showSnackbar("点击了 WiFi") } }
+                                )
+                                MioSettingNavigation(
+                                    title = "蓝牙",
+                                    info = "已关闭",
+                                    // 同样使用通用图标代替 Bluetooth
+                                    icon = Icons.Default.Place,
+                                    onClick = { /* 跳转 */ }
+                                )
+
+                                // 2. 开关
+                                MioSettingSwitch(
+                                    title = "飞行模式",
+                                    checked = isSwitchOn, // 复用之前的 state 方便测试
+                                    onCheckedChange = { isSwitchOn = it },
+                                    // 使用通用图标代替 AirplaneMode
+                                    icon = Icons.Default.Lock
+                                )
+
+                                // 3. 调节与主题
+                                MioSettingCategory("显示与亮度")
+                                MioSettingSlider(
+                                    title = "亮度级别",
+                                    value = sliderValue, // 复用之前的 state
+                                    onValueChange = { sliderValue = it },
+                                    // 使用 Star 代替 Brightness
+                                    icon = Icons.Default.Star
+                                )
+                                MioSettingSwitch(
+                                    title = "全局深色模式",
+                                    checked = isDarkTheme, // 复用全局 theme state
+                                    onCheckedChange = { isDarkTheme = it },
+                                    icon = Icons.Default.Settings // Settings 图标通常存在
+                                )
+
+                                // 4. 普通信息点击
+                                MioSettingCategory("系统信息")
+                                MioSettingItem(
+                                    title = "MioLib 版本",
+                                    subtitle = "v1.0.2 (Click to check update)",
+                                    icon = Icons.Default.Info,
+                                    onClick = { scope.launch { snackbarHostState.showSnackbar("已经是最新版本") } }
+                                )
+                                MioSettingItem(
+                                    title = "本机型号",
+                                    trailingContent = { MioTag("Pro Max") },
+                                    icon = Icons.Default.Phone // PhoneAndroid 改为 Phone
                                 )
                             }
                         }
