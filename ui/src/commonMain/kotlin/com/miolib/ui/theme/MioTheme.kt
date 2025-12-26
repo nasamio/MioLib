@@ -40,15 +40,15 @@ val LightColors = MioColors(
     outline = Color(0xFF9CA3AF)       // 浅灰边框
 )
 
-// --- Dark Mode: Deep Cyber (基于你的截图提取的深空青) ---
+// --- Dark Mode: Deep Cyber (修复对比度) ---
 val DarkColors = MioColors(
-    primary = Color(0xFF00E5FF),      // 高亮青色 (在深色背景极具科技感)
+    primary = Color(0xFF00E5FF),      // 高亮青色
     onPrimary = Color(0xFF000000),    // 青底黑字
-    background = Color(0xFF0F172A),   // 午夜深蓝灰 (比纯黑更有质感)
+    background = Color(0xFF0F172A),   // 午夜深蓝灰
     onBackground = Color(0xFFF1F5F9), // 亮灰白文字
-    surface = Color(0xFF1E293B),      // 稍微亮一点的深蓝灰卡片
-    onSurface = Color(0xFFE2E8F0),    // 卡片文字灰白
-    outline = Color(0xFF334155)       // 深色边框
+    surface = Color(0xFF1E293B),      // 深蓝灰卡片
+    onSurface = Color(0xFF94a3b8),    // 卡片文字灰白
+    outline = Color(0xFF94A3B8),      // 浅灰边框
 )
 
 // --- 2. 尺寸系统 ---
@@ -102,7 +102,7 @@ val AndroidSizes = MioSizes(
     large = SizeSpec(56.dp, 28.dp, 18.sp, 28.dp)
 )
 
-// 形状 (圆润风格，贴合你的截图)
+// 形状 (圆润风格)
 val RoundedShapes = MioShapes(
     cornerSmall = RoundedCornerShape(6.dp),
     cornerMedium = RoundedCornerShape(12.dp),
@@ -135,7 +135,6 @@ val LocalMioTypography = staticCompositionLocalOf { DefaultTypography }
 @Composable
 fun MioTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // 逻辑：如果 darkTheme 为真，使用 DarkColors (深空青)；否则使用 LightColors (静谧蓝)
     colors: MioColors = if (darkTheme) DarkColors else LightColors,
     sizes: MioSizes = MioTheme.sizes,
     shapes: MioShapes = MioTheme.shapes,

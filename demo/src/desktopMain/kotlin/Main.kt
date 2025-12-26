@@ -45,8 +45,7 @@ fun main() {
             val snackbarHostState = remember { SnackbarHostState() }
             val scope = rememberCoroutineScope()
 
-            // 默认选中 SMMS
-            var currentRoute by remember { mutableStateOf(Routes.SMMS) }
+            var currentRoute by remember { mutableStateOf(Routes.COMPONENTS) }
 
             LaunchedEffect(navController) {
                 navController.addOnDestinationChangedListener { _, destination, _ ->
@@ -64,29 +63,28 @@ fun main() {
                     drawerContent = {
                         MioText("MioLib Menu", style = MioTheme.typography.titleLarge)
                         Spacer(Modifier.height(24.dp))
-
-                        MioDrawerItem(
-                            label = "我的图床", // 调整顺序，图床在前
-                            selected = currentRoute == Routes.SMMS,
-                            onClick = {
-                                navController.navigate(Routes.SMMS) {
-                                    popUpTo(Routes.SMMS) { inclusive = true }
-                                }
-                                scope.launch { drawerState.close() }
-                            },
-                            icon = { Icon(Icons.Default.Create, null) }
-                        )
-
                         MioDrawerItem(
                             label = "组件展示",
                             selected = currentRoute == Routes.COMPONENTS,
                             onClick = {
-                                navController.navigate(Routes.COMPONENTS) {
+                                if (currentRoute != Routes.COMPONENTS) navController.navigate(Routes.COMPONENTS) {
                                     popUpTo(Routes.SMMS)
                                 }
                                 scope.launch { drawerState.close() }
                             },
                             icon = { Icon(Icons.Default.Home, null) }
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        MioDrawerItem(
+                            label = "我的图床", // 调整顺序，图床在前
+                            selected = currentRoute == Routes.SMMS,
+                            onClick = {
+                                if (currentRoute != Routes.SMMS) navController.navigate(Routes.SMMS) {
+                                    popUpTo(Routes.SMMS) { inclusive = true }
+                                }
+                                scope.launch { drawerState.close() }
+                            },
+                            icon = { Icon(Icons.Default.Create, null) }
                         )
                     }
                 ) {
@@ -114,7 +112,7 @@ fun main() {
                     ) { padding ->
                         NavHost(
                             navController = navController,
-                            startDestination = Routes.SMMS, // 修改：默认启动进入图床
+                            startDestination = Routes.COMPONENTS,
                             modifier = Modifier.padding(padding)
                         ) {
                             composable(Routes.COMPONENTS) {

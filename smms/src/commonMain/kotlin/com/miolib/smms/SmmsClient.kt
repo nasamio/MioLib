@@ -17,6 +17,7 @@ import io.ktor.client.statement.readRawBytes
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -109,6 +110,8 @@ class SmmsClient(private val token: String) {
             httpClient.post("https://sm.ms/api/v2/profile") {
                 header("Authorization", token)
             }.body()
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             println("GetProfile Error: ${e.message}")
             SmmsProfileResponse()
@@ -130,6 +133,8 @@ class SmmsClient(private val token: String) {
                     )
                 )
             }.body()
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             println("Upload Error: ${e.message}")
             SmmsUploadResponse()
@@ -141,6 +146,8 @@ class SmmsClient(private val token: String) {
             httpClient.get("https://sm.ms/api/v2/upload_history") {
                 header("Authorization", token)
             }.body()
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             println("GetHistory Error: ${e.message}")
             e.printStackTrace()
@@ -153,6 +160,8 @@ class SmmsClient(private val token: String) {
             httpClient.get("https://sm.ms/api/v2/delete/$hash") {
                 header("Authorization", token)
             }.body()
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             println("Delete Error: ${e.message}")
             SmmsBasicResponse()
@@ -163,6 +172,9 @@ class SmmsClient(private val token: String) {
         return try {
             val response: HttpResponse = httpClient.get(url)
             response.readRawBytes()
+        } catch (e: CancellationException) {
+            // 抛出 CancellationException
+            throw e
         } catch (e: Exception) {
             e.printStackTrace()
             null

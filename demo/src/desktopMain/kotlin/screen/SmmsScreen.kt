@@ -35,6 +35,7 @@ import com.miolib.smms.SmmsClient
 import com.miolib.smms.SmmsData
 import com.miolib.ui.components.*
 import com.miolib.ui.theme.MioTheme
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
@@ -221,7 +222,8 @@ fun SmmsScreen(snackbarHostState: SnackbarHostState) {
                         MioText(
                             "已用: $diskUsage / 总计: $diskLimit",
                             style = MioTheme.typography.caption,
-                            color = MioTheme.colors.outline
+                            // [修改]：不再直接用 outline，而是用主文字颜色降低不透明度，这样在深色模式下更亮、更清楚
+                            color = MioTheme.colors.onSurface.copy(alpha = 0.7f)
                         )
                     }
                 }
@@ -397,7 +399,8 @@ fun ImageGridItem(
                     MioText(
                         text = "${item.width} x ${item.height} • ${(item.size?.div(1024))} KB",
                         style = MioTheme.typography.caption,
-                        color = MioTheme.colors.outline,
+                        // [修改]：同样使用 onSurface + alpha，保证文字清晰可见
+                        color = MioTheme.colors.onSurface.copy(alpha = 0.6f),
                         maxLines = 1
                     )
                 }
@@ -442,6 +445,9 @@ fun AsyncNetworkImage(
                 } else {
                     isError = true
                 }
+            } catch (e: CancellationException) {
+                // 关键修改：重新抛出 CancellationException，让 Compose 正常处理取消逻辑
+                throw e
             } catch (e: Exception) {
                 e.printStackTrace()
                 isError = true
