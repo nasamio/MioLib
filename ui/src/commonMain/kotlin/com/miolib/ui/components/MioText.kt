@@ -7,14 +7,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import com.miolib.ui.theme.MioTheme
 
 /**
- * MioText: 统一文本组件
- *
- * @param style 文字样式 (语义化)，默认为 Body。建议优先使用 MioTheme.typography.xxx
- * @param color 文字颜色，默认为 Unspecified (将自动根据背景色计算或继承)
+ * MioText: 统一文本组件 (已修复 maxLines 支持)
  */
 @Composable
 fun MioText(
@@ -24,13 +22,10 @@ fun MioText(
     fontSize: TextUnit = TextUnit.Unspecified,
     fontWeight: FontWeight? = null,
     textAlign: TextAlign? = null,
-    // 关键改动：默认样式引用 Theme 中的 Body
-    style: TextStyle = MioTheme.typography.body
+    style: TextStyle = MioTheme.typography.body,
+    maxLines: Int = Int.MAX_VALUE, // 新增
+    overflow: TextOverflow = TextOverflow.Clip // 新增
 ) {
-    // 颜色处理逻辑：
-    // 1. 如果传了 color，用 color
-    // 2. 如果 style 里自带 color (且不是 Unspecified)，用 style 的
-    // 3. 否则兜底使用 onSurface (深色文字)
     val finalColor = if (color != Color.Unspecified) {
         color
     } else if (style.color != Color.Unspecified) {
@@ -43,11 +38,11 @@ fun MioText(
         text = text,
         modifier = modifier,
         color = finalColor,
-        // 允许外部覆盖 style 中的 fontSize
         fontSize = if (fontSize != TextUnit.Unspecified) fontSize else style.fontSize,
-        // 允许外部覆盖 style 中的 fontWeight
         fontWeight = fontWeight ?: style.fontWeight,
         textAlign = textAlign,
-        style = style
+        style = style,
+        maxLines = maxLines, // 透传
+        overflow = overflow  // 透传
     )
 }

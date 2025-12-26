@@ -23,7 +23,6 @@ import kotlinx.coroutines.launch
 import screen.ComponentScreen
 import screen.SmmsScreen
 
-// 定义路由名称
 object Routes {
     const val COMPONENTS = "components"
     const val SMMS = "smms"
@@ -31,25 +30,23 @@ object Routes {
 
 fun main() {
     application {
-        Window(onCloseRequest = ::exitApplication, title = "MioLib Pro Demo v2.2 (Navigation)") {
-            // --- 全局状态 ---
+        // 调整窗口标题
+        Window(onCloseRequest = ::exitApplication, title = "MioLib Storage Manager") {
             var isDarkTheme by remember { mutableStateOf(false) }
+            // 默认使用直角风格和桌面尺寸，更像桌面软件
             var useAndroidSize by remember { mutableStateOf(false) }
-            var useSquareShape by remember { mutableStateOf(false) }
+            var useSquareShape by remember { mutableStateOf(true) }
 
             val currentSizes = if (useAndroidSize) AndroidSizes else DesktopSizes
             val currentShapes = if (useSquareShape) SquareShapes else RoundedShapes
 
-            // Navigation Controller
             val navController = rememberNavController()
-
-            // Drawer & Snackbar 状态
             val drawerState = rememberDrawerState(DrawerValue.Closed)
             val snackbarHostState = remember { SnackbarHostState() }
             val scope = rememberCoroutineScope()
 
-            // 记录当前路由用于更新 Drawer 选中状态
-            var currentRoute by remember { mutableStateOf(Routes.COMPONENTS) }
+            // 默认选中 SMMS
+            var currentRoute by remember { mutableStateOf(Routes.SMMS) }
 
             LaunchedEffect(navController) {
                 navController.addOnDestinationChangedListener { _, destination, _ ->
@@ -69,45 +66,44 @@ fun main() {
                         Spacer(Modifier.height(24.dp))
 
                         MioDrawerItem(
-                            label = "组件展示",
-                            selected = currentRoute == Routes.COMPONENTS,
-                            onClick = {
-                                navController.navigate(Routes.COMPONENTS) {
-                                    popUpTo(Routes.COMPONENTS) { inclusive = true }
-                                }
-                                scope.launch { drawerState.close() }
-                            },
-                            icon = { Icon(Icons.Default.Home, null) }
-                        )
-
-                        MioDrawerItem(
-                            label = "网络测试 (SM.MS)",
+                            label = "我的图床", // 调整顺序，图床在前
                             selected = currentRoute == Routes.SMMS,
                             onClick = {
                                 navController.navigate(Routes.SMMS) {
-                                    popUpTo(Routes.COMPONENTS)
+                                    popUpTo(Routes.SMMS) { inclusive = true }
                                 }
                                 scope.launch { drawerState.close() }
                             },
                             icon = { Icon(Icons.Default.Create, null) }
+                        )
+
+                        MioDrawerItem(
+                            label = "组件展示",
+                            selected = currentRoute == Routes.COMPONENTS,
+                            onClick = {
+                                navController.navigate(Routes.COMPONENTS) {
+                                    popUpTo(Routes.SMMS)
+                                }
+                                scope.launch { drawerState.close() }
+                            },
+                            icon = { Icon(Icons.Default.Home, null) }
                         )
                     }
                 ) {
                     MioScaffold(
                         snackbarHostState = snackbarHostState,
                         topBar = {
+                            // 当在图床页面时，TopBar 可以简化，把控制权交给页面内部，或者只保留基础功能
                             val title = when (currentRoute) {
-                                Routes.COMPONENTS -> "MioLib 全家桶"
-                                Routes.SMMS -> "SM.MS 图床测试"
+                                Routes.COMPONENTS -> "组件预览"
+                                Routes.SMMS -> "Mio 图床" // 简单标题
                                 else -> "MioLib"
                             }
 
                             MioTopBar(
                                 title = title,
                                 actions = {
-                                    MioBadgeWrapper(count = null) {
-                                        MioSwitch(checked = isDarkTheme, onCheckedChange = { isDarkTheme = it })
-                                    }
+                                    MioSwitch(checked = isDarkTheme, onCheckedChange = { isDarkTheme = it })
                                     Spacer(Modifier.width(16.dp))
                                     IconButton(onClick = { scope.launch { drawerState.open() } }) {
                                         Icon(Icons.Default.Menu, null, tint = MioTheme.colors.onBackground)
@@ -118,7 +114,7 @@ fun main() {
                     ) { padding ->
                         NavHost(
                             navController = navController,
-                            startDestination = Routes.COMPONENTS,
+                            startDestination = Routes.SMMS, // 修改：默认启动进入图床
                             modifier = Modifier.padding(padding)
                         ) {
                             composable(Routes.COMPONENTS) {
