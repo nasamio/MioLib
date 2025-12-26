@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.jetbrainsCompose)
-    // 必须添加这一行，否则 Kotlin 2.0 无法编译 Compose 代码
     alias(libs.plugins.composeCompiler)
 }
 
@@ -13,8 +12,21 @@ kotlin {
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation(project(":ui"))
-                // material3
+                implementation(project(":smms"))
+
                 implementation(compose.material3)
+
+                // Navigation
+                implementation(libs.androidx.navigation.compose)
+
+                // 协程
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0")
+
+                // --- 新增：运行时必要依赖 ---
+                // 1. Ktor 引擎 (防止 ServiceLoader 找不到引擎导致 Crash)
+                implementation(libs.ktor.client.cio)
+                // 2. 日志实现 (防止 Ktor 报错 No SLF4J providers found)
+                implementation("org.slf4j:slf4j-simple:2.0.9")
             }
         }
     }
