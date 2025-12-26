@@ -35,7 +35,7 @@ fun main() {
             var isDarkTheme by remember { mutableStateOf(false) }
             // 默认使用直角风格和桌面尺寸，更像桌面软件
             var useAndroidSize by remember { mutableStateOf(false) }
-            var useSquareShape by remember { mutableStateOf(true) }
+            var useSquareShape by remember { mutableStateOf(false) }
 
             val currentSizes = if (useAndroidSize) AndroidSizes else DesktopSizes
             val currentShapes = if (useSquareShape) SquareShapes else RoundedShapes

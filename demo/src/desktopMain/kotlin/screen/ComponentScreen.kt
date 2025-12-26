@@ -145,14 +145,13 @@ fun ComponentScreen(
     }
 
     // 弹窗处理
-    if (showDialog) {
-        MioDialog(
-            onDismissRequest = { showDialog = false },
-            title = "Mio Dialog",
-            text = "这是一个标准的对话框组件。",
-            onConfirm = { showDialog = false }
-        )
-    }
+    MioAlertDialog(
+        visible = showDialog, // 这里传入你的状态变量
+        onDismissRequest = { showDialog = false },
+        title = "Mio Dialog",
+        text = "对话框组件",
+        onConfirm = { showDialog = false }
+    )
     if (showBottomSheet) {
         MioBottomSheet(onDismissRequest = { showBottomSheet = false }) {
             Column(
