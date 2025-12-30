@@ -22,11 +22,12 @@ kotlin {
                 // 协程
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0")
 
-                // --- 新增：运行时必要依赖 ---
                 // 1. Ktor 引擎 (防止 ServiceLoader 找不到引擎导致 Crash)
                 implementation(libs.ktor.client.cio)
                 // 2. 日志实现 (防止 Ktor 报错 No SLF4J providers found)
                 implementation("org.slf4j:slf4j-simple:2.0.9")
+                // 反射
+                implementation(kotlin("reflect"))
             }
         }
     }

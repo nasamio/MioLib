@@ -28,12 +28,12 @@ fun MioTopBar(
     title: String,
     modifier: Modifier = Modifier,
     onBackClick: (() -> Unit)? = null,
+    // 如果传入此参数，将覆盖默认的返回箭头逻辑
+    navigationIcon: (@Composable () -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
     backgroundColor: Color = MioTheme.colors.background,
     contentColor: Color = MioTheme.colors.onBackground
 ) {
-    // 关键修复：在外层套一个 Surface 来负责渲染背景色
-    // Surface 的颜色切换是瞬间的，不会像 TopAppBar 内部那样有过渡动画
     Surface(
         color = backgroundColor,
         modifier = modifier
@@ -50,7 +50,12 @@ fun MioTopBar(
             // 这里的 modifier 不再需要背景色，因为外层 Surface 已经处理了
             modifier = Modifier,
             navigationIcon = {
-                if (onBackClick != null) {
+                // 优先渲染自定义的 navigationIcon
+                if (navigationIcon != null) {
+                    navigationIcon()
+                }
+                // 如果没有自定义 icon，但有点击事件，则显示默认返回箭头
+                else if (onBackClick != null) {
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -62,8 +67,6 @@ fun MioTopBar(
             },
             actions = actions,
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                // 核心点：强制把组件内部的容器色设为透明
-                // 这样用户看到的就是下方 Surface 的颜色，实现了瞬间切换
                 containerColor = Color.Transparent,
                 scrolledContainerColor = Color.Transparent,
 

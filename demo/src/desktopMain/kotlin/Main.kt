@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,8 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.miolib.ui.components.*
 import com.miolib.ui.theme.*
@@ -23,34 +23,31 @@ import kotlinx.coroutines.launch
 import screen.ComponentScreen
 import screen.SmmsScreen
 
-object Routes {
-    const val COMPONENTS = "components"
-    const val SMMS = "smms"
-}
-
 fun main() {
     application {
-        // 调整窗口标题
         Window(onCloseRequest = ::exitApplication, title = "MioLib Storage Manager") {
+            // --- 全局状态 ---
             var isDarkTheme by remember { mutableStateOf(false) }
-            // 默认使用直角风格和桌面尺寸，更像桌面软件
             var useAndroidSize by remember { mutableStateOf(false) }
             var useSquareShape by remember { mutableStateOf(false) }
 
+            // --- 样式计算 ---
             val currentSizes = if (useAndroidSize) AndroidSizes else DesktopSizes
             val currentShapes = if (useSquareShape) SquareShapes else RoundedShapes
 
+            // --- 导航控制器与状态 ---
             val navController = rememberNavController()
             val drawerState = rememberDrawerState(DrawerValue.Closed)
             val snackbarHostState = remember { SnackbarHostState() }
             val scope = rememberCoroutineScope()
 
-            var currentRoute by remember { mutableStateOf(Routes.COMPONENTS) }
-
-            LaunchedEffect(navController) {
-                navController.addOnDestinationChangedListener { _, destination, _ ->
-                    destination.route?.let { currentRoute = it }
-                }
+            // 监听当前的路由堆栈
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            // 实时获取当前的路由字符串
+            val currentRouteString = navBackStackEntry?.destination?.route
+            // 将字符串映射回 Routes 对象 (用于获取标题、判断选中状态)
+            val currentRouteObj = remember(currentRouteString) {
+                Routes.getByRoute(currentRouteString)
             }
 
             MioTheme(
@@ -60,62 +57,65 @@ fun main() {
             ) {
                 MioDrawer(
                     drawerState = drawerState,
+                    sheetModifier = Modifier.width(200.dp),
                     drawerContent = {
                         MioText("MioLib Menu", style = MioTheme.typography.titleLarge)
                         Spacer(Modifier.height(24.dp))
-                        MioDrawerItem(
-                            label = "组件展示",
-                            selected = currentRoute == Routes.COMPONENTS,
-                            onClick = {
-                                if (currentRoute != Routes.COMPONENTS) navController.navigate(Routes.COMPONENTS) {
-                                    popUpTo(Routes.SMMS)
+
+                        Routes.all.forEach { item ->
+                            MioDrawerItem(
+                                label = item.title,
+                                selected = currentRouteObj == item, // 自动判断是否选中
+                                icon = { Icon(item.icon, contentDescription = null) },
+                                onClick = {
+                                    if (currentRouteObj != item) {
+                                        navController.navigate(item.route) {
+                                            val startRoute = navController.graph.findStartDestination().route
+                                            if (startRoute != null) {
+                                                popUpTo(startRoute) {
+                                                    saveState = true
+                                                }
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    }
+                                    scope.launch { drawerState.close() }
                                 }
-                                scope.launch { drawerState.close() }
-                            },
-                            icon = { Icon(Icons.Default.Home, null) }
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        MioDrawerItem(
-                            label = "我的图床", // 调整顺序，图床在前
-                            selected = currentRoute == Routes.SMMS,
-                            onClick = {
-                                if (currentRoute != Routes.SMMS) navController.navigate(Routes.SMMS) {
-                                    popUpTo(Routes.SMMS) { inclusive = true }
-                                }
-                                scope.launch { drawerState.close() }
-                            },
-                            icon = { Icon(Icons.Default.Create, null) }
-                        )
+                            )
+                            Spacer(Modifier.height(8.dp))
+                        }
                     }
                 ) {
                     MioScaffold(
                         snackbarHostState = snackbarHostState,
                         topBar = {
-                            // 当在图床页面时，TopBar 可以简化，把控制权交给页面内部，或者只保留基础功能
-                            val title = when (currentRoute) {
-                                Routes.COMPONENTS -> "组件预览"
-                                Routes.SMMS -> "Mio 图床" // 简单标题
-                                else -> "MioLib"
-                            }
-
                             MioTopBar(
-                                title = title,
-                                actions = {
-                                    MioSwitch(checked = isDarkTheme, onCheckedChange = { isDarkTheme = it })
-                                    Spacer(Modifier.width(16.dp))
+                                title = currentRouteObj?.title ?: "MioLib",
+                                navigationIcon = {
                                     IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                        Icon(Icons.Default.Menu, null, tint = MioTheme.colors.onBackground)
+                                        Icon(
+                                            Icons.Default.Menu,
+                                            null,
+                                            tint = MioTheme.colors.onBackground
+                                        )
                                     }
+                                },
+                                actions = {
+                                    MioSwitch(
+                                        checked = isDarkTheme,
+                                        onCheckedChange = { isDarkTheme = it }
+                                    )
                                 }
                             )
                         }
                     ) { padding ->
                         NavHost(
                             navController = navController,
-                            startDestination = Routes.COMPONENTS,
+                            startDestination = Routes.COMPONENTS.route, // 使用对象的 route 属性
                             modifier = Modifier.padding(padding)
                         ) {
-                            composable(Routes.COMPONENTS) {
+                            composable(Routes.COMPONENTS.route) {
                                 ComponentScreen(
                                     snackbarHostState = snackbarHostState,
                                     useAndroidSize = useAndroidSize,
@@ -127,7 +127,7 @@ fun main() {
                                 )
                             }
 
-                            composable(Routes.SMMS) {
+                            composable(Routes.SMMS.route) {
                                 SmmsScreen(snackbarHostState)
                             }
                         }
