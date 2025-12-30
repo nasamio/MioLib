@@ -17,3 +17,4 @@ rootProject.name = "MioLib"
 include(":ui")
 include(":demo")
 include(":smms")
+include("rss")

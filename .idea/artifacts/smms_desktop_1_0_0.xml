@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="smms-desktop-1.0.0">
+    <output-path>$PROJECT_DIR$/smms/build/libs</output-path>
+    <root id="archive" name="smms-desktop-1.0.0.jar">
+      <element id="module-output" name="MioLib.smms.desktopMain" />
+    </root>
+  </artifact>
+</component>

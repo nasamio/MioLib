@@ -21,6 +21,7 @@ import com.miolib.ui.components.*
 import com.miolib.ui.theme.*
 import kotlinx.coroutines.launch
 import screen.ComponentScreen
+import screen.RssScreen // [新增]
 import screen.SmmsScreen
 
 fun main() {
@@ -63,7 +64,6 @@ fun main() {
                             MioDrawerItem(
                                 label = item.title,
                                 selected = currentRouteObj == item,
-                                // [Update] 使用 MioIcon
                                 icon = { MioIcon(item.icon, contentDescription = null) },
                                 onClick = {
                                     if (currentRouteObj != item) {
@@ -90,7 +90,6 @@ fun main() {
                                 title = currentRouteObj?.title ?: "MioLib",
                                 navigationIcon = {
                                     IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                        // [Update] 使用 MioIcon
                                         MioIcon(
                                             Icons.Default.Menu,
                                             null,
@@ -109,9 +108,13 @@ fun main() {
                     ) { padding ->
                         NavHost(
                             navController = navController,
-                            startDestination = Routes.COMPONENTS.route,
+                            startDestination = Routes.all.minBy { it.index }.route,
                             modifier = Modifier.padding(padding)
                         ) {
+                            composable(Routes.RSS.route) {
+                                RssScreen(snackbarHostState)
+                            }
+
                             composable(Routes.COMPONENTS.route) {
                                 ComponentScreen(
                                     snackbarHostState = snackbarHostState,

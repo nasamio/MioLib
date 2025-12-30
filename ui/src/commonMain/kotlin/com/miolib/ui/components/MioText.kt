@@ -12,7 +12,8 @@ import androidx.compose.ui.unit.TextUnit
 import com.miolib.ui.theme.MioTheme
 
 /**
- * MioText: 统一文本组件 (已修复 maxLines 支持)
+ * MioText: 统一文本组件
+ * [更新] 新增 lineHeight 参数支持
  */
 @Composable
 fun MioText(
@@ -22,9 +23,10 @@ fun MioText(
     fontSize: TextUnit = TextUnit.Unspecified,
     fontWeight: FontWeight? = null,
     textAlign: TextAlign? = null,
+    lineHeight: TextUnit = TextUnit.Unspecified, // [新增参数]
     style: TextStyle = MioTheme.typography.body,
-    maxLines: Int = Int.MAX_VALUE, // 新增
-    overflow: TextOverflow = TextOverflow.Clip // 新增
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip
 ) {
     val finalColor = if (color != Color.Unspecified) {
         color
@@ -41,8 +43,9 @@ fun MioText(
         fontSize = if (fontSize != TextUnit.Unspecified) fontSize else style.fontSize,
         fontWeight = fontWeight ?: style.fontWeight,
         textAlign = textAlign,
+        lineHeight = lineHeight, // [透传参数]
         style = style,
-        maxLines = maxLines, // 透传
-        overflow = overflow  // 透传
+        maxLines = maxLines,
+        overflow = overflow
     )
 }

@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="rss-desktop-1.0.0">
+    <output-path>$PROJECT_DIR$/rss/build/libs</output-path>
+    <root id="archive" name="rss-desktop-1.0.0.jar">
+      <element id="module-output" name="MioLib.rss.desktopMain" />
+    </root>
+  </artifact>
+</component>

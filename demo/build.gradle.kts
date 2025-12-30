@@ -13,20 +13,13 @@ kotlin {
                 implementation(compose.desktop.currentOs)
                 implementation(project(":ui"))
                 implementation(project(":smms"))
+                implementation(project(":rss"))
 
                 implementation(compose.material3)
-
-                // Navigation
                 implementation(libs.androidx.navigation.compose)
-
-                // 协程
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0")
-
-                // 1. Ktor 引擎 (防止 ServiceLoader 找不到引擎导致 Crash)
                 implementation(libs.ktor.client.cio)
-                // 2. 日志实现 (防止 Ktor 报错 No SLF4J providers found)
                 implementation("org.slf4j:slf4j-simple:2.0.9")
-                // 反射
                 implementation(kotlin("reflect"))
             }
         }
