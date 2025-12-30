@@ -41,11 +41,8 @@ fun main() {
             val snackbarHostState = remember { SnackbarHostState() }
             val scope = rememberCoroutineScope()
 
-            // 监听当前的路由堆栈
             val navBackStackEntry by navController.currentBackStackEntryAsState()
-            // 实时获取当前的路由字符串
             val currentRouteString = navBackStackEntry?.destination?.route
-            // 将字符串映射回 Routes 对象 (用于获取标题、判断选中状态)
             val currentRouteObj = remember(currentRouteString) {
                 Routes.getByRoute(currentRouteString)
             }
@@ -65,16 +62,15 @@ fun main() {
                         Routes.all.forEach { item ->
                             MioDrawerItem(
                                 label = item.title,
-                                selected = currentRouteObj == item, // 自动判断是否选中
-                                icon = { Icon(item.icon, contentDescription = null) },
+                                selected = currentRouteObj == item,
+                                // [Update] 使用 MioIcon
+                                icon = { MioIcon(item.icon, contentDescription = null) },
                                 onClick = {
                                     if (currentRouteObj != item) {
                                         navController.navigate(item.route) {
                                             val startRoute = navController.graph.findStartDestination().route
                                             if (startRoute != null) {
-                                                popUpTo(startRoute) {
-                                                    saveState = true
-                                                }
+                                                popUpTo(startRoute) { saveState = true }
                                             }
                                             launchSingleTop = true
                                             restoreState = true
@@ -94,7 +90,8 @@ fun main() {
                                 title = currentRouteObj?.title ?: "MioLib",
                                 navigationIcon = {
                                     IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                        Icon(
+                                        // [Update] 使用 MioIcon
+                                        MioIcon(
                                             Icons.Default.Menu,
                                             null,
                                             tint = MioTheme.colors.onBackground
@@ -112,7 +109,7 @@ fun main() {
                     ) { padding ->
                         NavHost(
                             navController = navController,
-                            startDestination = Routes.COMPONENTS.route, // 使用对象的 route 属性
+                            startDestination = Routes.COMPONENTS.route,
                             modifier = Modifier.padding(padding)
                         ) {
                             composable(Routes.COMPONENTS.route) {

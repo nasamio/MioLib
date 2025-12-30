@@ -46,33 +46,27 @@ import java.io.File
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
 
-// --- 图片内存缓存 ---
+// ... [省略 SmmsImageCache 对象，内容不变] ...
 object SmmsImageCache {
     val bitmapCache = mutableMapOf<String, ImageBitmap>()
 }
 
-// ==========================================
-// SMMS 图床主界面
-// ==========================================
 @Composable
 fun SmmsScreen(snackbarHostState: SnackbarHostState) {
+    // ... [省略状态和逻辑代码，保持不变] ...
     val scope = rememberCoroutineScope()
-
-    // 状态管理
     var smmsToken by remember { mutableStateOf("Cac8ge6lwmQ7CCLENFZ3KAFLYJ6s6AbI") }
     var historyList by remember { mutableStateOf<List<SmmsData>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
-
-    // 大图查看状态
     var viewingUrl by remember { mutableStateOf<String?>(null) }
-
-    // 用户信息
     var userName by remember { mutableStateOf("未登录") }
     var diskUsage by remember { mutableStateOf("---") }
     var diskLimit by remember { mutableStateOf("---") }
     var userRole by remember { mutableStateOf("") }
 
-    // 辅助：排序
+    // ... [省略辅助函数：sortList, copyToClipboard, refreshData, uploadFile, deleteItem, openFilePicker] ...
+    // (逻辑代码不变，此处省略以节省篇幅，重点在下方的 UI 替换)
+
     fun sortList(list: List<SmmsData>): List<SmmsData> {
         return list.sortedWith(compareByDescending<SmmsData> {
             if (it.hash?.startsWith("temp_") == true) Long.MAX_VALUE else 0L
@@ -85,12 +79,9 @@ fun SmmsScreen(snackbarHostState: SnackbarHostState) {
         try {
             val selection = StringSelection(text)
             Toolkit.getDefaultToolkit().systemClipboard.setContents(selection, selection)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        } catch (e: Exception) { e.printStackTrace() }
     }
 
-    // 动作：刷新数据
     suspend fun refreshData() {
         if (smmsToken.isBlank()) return
         isLoading = true
@@ -99,10 +90,7 @@ fun SmmsScreen(snackbarHostState: SnackbarHostState) {
             val res = client.getProfile()
             val data = res.data
             if (res.success && data != null) {
-                userName = data.username
-                userRole = data.role
-                diskUsage = data.diskUsage
-                diskLimit = data.diskLimit
+                userName = data.username; userRole = data.role; diskUsage = data.diskUsage; diskLimit = data.diskLimit
             }
         }
         val historyJob = scope.launch {
@@ -117,38 +105,22 @@ fun SmmsScreen(snackbarHostState: SnackbarHostState) {
         isLoading = false
     }
 
-    // 动作：上传文件 (乐观UI)
     fun uploadFile(file: File) {
         scope.launch {
             try {
                 val bytes = withContext(Dispatchers.IO) { file.readBytes() }
                 val localBitmap = org.jetbrains.skia.Image.makeFromEncoded(bytes).toComposeImageBitmap()
                 val tempKey = "local_preview_${file.name}_${System.currentTimeMillis()}"
-
                 SmmsImageCache.bitmapCache[tempKey] = localBitmap
-
-                val tempItem = SmmsData(
-                    filename = file.name,
-                    width = 0, height = 0, size = bytes.size,
-                    url = tempKey,
-                    hash = "temp_${System.currentTimeMillis()}",
-                    createdAt = "0"
-                )
-
+                val tempItem = SmmsData(filename = file.name, width = 0, height = 0, size = bytes.size, url = tempKey, hash = "temp_${System.currentTimeMillis()}", createdAt = "0")
                 historyList = listOf(tempItem) + historyList
-
                 val client = SmmsClient(smmsToken)
                 val res = client.uploadImage(file.name, bytes)
-
                 if (res.success && res.data != null) {
                     val serverItem = res.data
                     historyList = historyList.map { (if (it.hash == tempItem.hash) serverItem else it) as SmmsData }
                     snackbarHostState.showSnackbar("上传成功: ${file.name}")
-                    // 刷新容量
-                    launch {
-                        val profile = client.getProfile()
-                        profile.data?.let { diskUsage = it.diskUsage }
-                    }
+                    launch { client.getProfile().data?.let { diskUsage = it.diskUsage } }
                 } else {
                     historyList = historyList.filter { it.hash != tempItem.hash }
                     snackbarHostState.showSnackbar("上传失败: ${res.message}")
@@ -161,7 +133,6 @@ fun SmmsScreen(snackbarHostState: SnackbarHostState) {
         }
     }
 
-    // 动作：删除
     fun deleteItem(item: SmmsData) {
         historyList = historyList.filter { it.hash != item.hash }
         scope.launch {
@@ -170,10 +141,7 @@ fun SmmsScreen(snackbarHostState: SnackbarHostState) {
             if (!res.success) {
                 snackbarHostState.showSnackbar("服务器删除失败: ${res.message}")
             } else {
-                launch {
-                    val profile = client.getProfile()
-                    profile.data?.let { diskUsage = it.diskUsage }
-                }
+                launch { client.getProfile().data?.let { diskUsage = it.diskUsage } }
             }
         }
     }
@@ -222,7 +190,6 @@ fun SmmsScreen(snackbarHostState: SnackbarHostState) {
                         MioText(
                             "已用: $diskUsage / 总计: $diskLimit",
                             style = MioTheme.typography.caption,
-                            // [修改]：不再直接用 outline，而是用主文字颜色降低不透明度，这样在深色模式下更亮、更清楚
                             color = MioTheme.colors.onSurface.copy(alpha = 0.7f)
                         )
                     }
@@ -230,7 +197,8 @@ fun SmmsScreen(snackbarHostState: SnackbarHostState) {
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = { scope.launch { refreshData() } }) {
-                        Icon(Icons.Default.Refresh, "Refresh", tint = MioTheme.colors.primary)
+                        // [Update] 使用 MioIcon
+                        MioIcon(Icons.Default.Refresh, "Refresh", tint = MioTheme.colors.primary)
                     }
                     if (isLoading) {
                         MioLoading(size = 24.dp)
@@ -260,8 +228,8 @@ fun SmmsScreen(snackbarHostState: SnackbarHostState) {
                         item = item,
                         smmsToken = smmsToken,
                         onDelete = { deleteItem(item) },
-                        onView = { viewingUrl = item.url }, // 左键：查看大图
-                        onCopy = { // 右键：复制
+                        onView = { viewingUrl = item.url },
+                        onCopy = {
                             item.url?.let {
                                 copyToClipboard(it)
                                 scope.launch { snackbarHostState.showSnackbar("已复制: $it") }
@@ -273,7 +241,6 @@ fun SmmsScreen(snackbarHostState: SnackbarHostState) {
         }
     }
 
-    // 全屏查看器 Popup
     if (viewingUrl != null) {
         FullScreenImageViewer(
             url = viewingUrl!!,
@@ -298,28 +265,20 @@ fun ImageGridItem(
     MioCard(
         modifier = Modifier.fillMaxWidth().height(240.dp),
         elevation = 2.dp
-        // 这里的 onClick 留空，使用内部 Box 处理具体的左右键逻辑
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-
-            // 1. 上半部分：图片区域
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
                     .background(MioTheme.colors.surface)
-                    // 修复：使用 PointerMatcher.Primary 和 PointerMatcher.mouse(PointerButton.Secondary)
                     .onClick(
                         matcher = PointerMatcher.Primary,
-                        onClick = if (isUploading) {
-                            {}
-                        } else onView
+                        onClick = if (isUploading) { {} } else onView
                     )
                     .onClick(
                         matcher = PointerMatcher.mouse(PointerButton.Secondary),
-                        onClick = if (isUploading) {
-                            {}
-                        } else onCopy
+                        onClick = if (isUploading) { {} } else onCopy
                     )
             ) {
                 if (!item.url.isNullOrBlank()) {
@@ -330,7 +289,8 @@ fun ImageGridItem(
                     )
                 } else {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.Create, null, tint = Color.Gray)
+                        // [Update] 使用 MioIcon
+                        MioIcon(Icons.Default.Create, null, tint = Color.Gray)
                     }
                 }
 
@@ -343,19 +303,16 @@ fun ImageGridItem(
                     }
                 }
 
-                // 优化后的删除按钮：圆形半透明背景
                 Surface(
                     onClick = onDelete,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(6.dp)
-                        .size(28.dp),
+                    modifier = Modifier.align(Alignment.TopEnd).padding(6.dp).size(28.dp),
                     shape = CircleShape,
-                    color = Color.Black.copy(alpha = 0.4f), // 半透明黑底
+                    color = Color.Black.copy(alpha = 0.4f),
                     contentColor = Color.White
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(
+                        // [Update] 使用 MioIcon
+                        MioIcon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Delete",
                             tint = Color.White.copy(alpha = 0.9f),
@@ -364,27 +321,21 @@ fun ImageGridItem(
                     }
                 }
 
-                // 提示条
                 if (!isUploading) {
                     Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
-                            .background(Color.Black.copy(alpha = 0.6f))
-                            .padding(vertical = 4.dp),
+                        modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().background(Color.Black.copy(alpha = 0.6f)).padding(vertical = 4.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         MioText(
                             text = "左键大图 • 右键复制",
                             style = MioTheme.typography.caption,
                             color = Color.White.copy(alpha = 0.9f),
-                            fontSize = 11.dp.value.toTextUnit() // 稍微小一点
+                            fontSize = 11.dp.value.toTextUnit()
                         )
                     }
                 }
             }
 
-            // 2. 下半部分：文字信息
             Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
                 MioText(
                     text = item.filename ?: "Unknown",
@@ -399,7 +350,6 @@ fun ImageGridItem(
                     MioText(
                         text = "${item.width} x ${item.height} • ${(item.size?.div(1024))} KB",
                         style = MioTheme.typography.caption,
-                        // [修改]：同样使用 onSurface + alpha，保证文字清晰可见
                         color = MioTheme.colors.onSurface.copy(alpha = 0.6f),
                         maxLines = 1
                     )
@@ -409,11 +359,9 @@ fun ImageGridItem(
     }
 }
 
-// --- 简单的扩展函数用于 dp 转 sp (仅限此处使用) ---
 @Composable
 private fun Float.toTextUnit() = this.sp
 
-// --- 网络图片加载 ---
 @Composable
 fun AsyncNetworkImage(
     url: String,
@@ -445,22 +393,19 @@ fun AsyncNetworkImage(
                 } else {
                     isError = true
                 }
-            } catch (e: CancellationException) {
-                // 关键修改：重新抛出 CancellationException，让 Compose 正常处理取消逻辑
-                throw e
-            } catch (e: Exception) {
-                e.printStackTrace()
-                isError = true
-            }
+            } catch (e: CancellationException) { throw e } catch (e: Exception) { e.printStackTrace(); isError = true }
         }
     }
 
     if (imageBitmap != null) {
-        Image(
-            bitmap = imageBitmap!!,
+        // [Update] 使用 MioImage (标准模式)
+        // 使用 Painter 版本的 MioImage
+        MioImage(
+            painter = androidx.compose.ui.graphics.painter.BitmapPainter(imageBitmap!!),
             contentDescription = null,
             modifier = modifier,
-            contentScale = contentScale
+            contentScale = contentScale,
+            enableClickToExpand = false // 列表页已经有点击逻辑，这里不开启内部的点击
         )
     } else if (isError) {
         Box(modifier, contentAlignment = Alignment.Center) {
@@ -473,13 +418,17 @@ fun AsyncNetworkImage(
     }
 }
 
-// --- 全屏大图查看器 ---
 @Composable
 fun FullScreenImageViewer(
     url: String,
     token: String,
     onDismiss: () -> Unit,
 ) {
+    // 复用 MioImage 的内置全屏逻辑比较困难，因为需要异步加载。
+    // 这里保持原有的 FullScreenImageViewer 实现，但在内部使用 AsyncNetworkImage (它现在内部是 MioImage)
+    // 或者，为了保持简单，维持现状，但里面的 AsyncNetworkImage 已经换成了 MioImage。
+    // 下面是原有的手动实现，未做改动，因为它包含了手势和异步加载逻辑，MioImage 目前只接受已加载的 Painter。
+
     var scale by remember { mutableStateOf(1f) }
     var offsetX by remember { mutableStateOf(0f) }
     var offsetY by remember { mutableStateOf(0f) }
@@ -499,21 +448,13 @@ fun FullScreenImageViewer(
                                 val maxTy = (1000f * (scale - 1)) / 2
                                 offsetX = (offsetX + pan.x * scale).coerceIn(-maxTx, maxTx)
                                 offsetY = (offsetY + pan.y * scale).coerceIn(-maxTy, maxTy)
-                            } else {
-                                offsetX = 0f; offsetY = 0f
-                            }
+                            } else { offsetX = 0f; offsetY = 0f }
                         }
                     }
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onTap = { onDismiss() },
-                            onDoubleTap = {
-                                if (scale > 1f) {
-                                    scale = 1f; offsetX = 0f; offsetY = 0f
-                                } else {
-                                    scale = 2.5f
-                                }
-                            }
+                            onDoubleTap = { if (scale > 1f) { scale = 1f; offsetX = 0f; offsetY = 0f } else { scale = 2.5f } }
                         )
                     },
                 contentAlignment = Alignment.Center

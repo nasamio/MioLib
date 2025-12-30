@@ -13,13 +13,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -31,67 +32,69 @@ import androidx.compose.ui.window.Popup
 import com.miolib.ui.theme.MioTheme
 
 /**
- * MioImage: 支持点击放大的图片组件
+ * MioImage: 通用图片组件 (增强版)
  *
- * 修复：现在会自动适配黑夜模式下的图标颜色。
+ * 既可以作为普通 Image 使用，也支持圆角裁切和点击全屏查看。
  *
- * @param tint 强制指定图片的着色 (通常用于 Icon)。如果不传：
- * - 对于 ImageVector：小图模式自动跟随 Theme.onSurface (黑/白)，全屏模式自动变白。
- * - 对于 Painter (照片)：默认显示原色，不着色。
+ * @param enableClickToExpand 是否开启点击全屏查看 (默认 false)
+ * @param cornerRadius 圆角大小 (默认 0.dp，即直角)
  */
 @Composable
 fun MioImage(
     modifier: Modifier = Modifier,
-    imageVector: ImageVector? = null,
     painter: Painter? = null,
+    imageVector: ImageVector? = null,
     contentDescription: String? = null,
-    size: Dp = 100.dp,
-    cornerRadius: Dp = 8.dp,
-    contentScale: ContentScale = ContentScale.Crop,
-    enableClickToExpand: Boolean = true,
-    tint: Color? = null // 新增：手动控制颜色
+    alignment: Alignment = Alignment.Center,
+    contentScale: ContentScale = ContentScale.Fit,
+    alpha: Float = DefaultAlpha,
+    colorFilter: ColorFilter? = null,
+    // --- 增强功能 ---
+    enableClickToExpand: Boolean = false,
+    cornerRadius: Dp = 0.dp
 ) {
     // 是否处于全屏查看模式
     var isExpanded by remember { mutableStateOf(false) }
 
-    // 计算小图模式下的默认颜色过滤器
-    val defaultColorFilter = if (tint != null) {
-        ColorFilter.tint(tint)
+    // 处理圆角和点击
+    val finalModifier = modifier
+        .let {
+            if (cornerRadius > 0.dp) it.clip(RoundedCornerShape(cornerRadius)) else it
+        }
+        .let {
+            if (enableClickToExpand) it.clickable { isExpanded = true } else it
+        }
+
+    // 智能计算 ColorFilter: 如果是 Vector 且未指定 Filter，则适配主题色
+    val finalColorFilter = if (colorFilter != null) {
+        colorFilter
     } else if (imageVector != null) {
-        // 关键修复：如果是矢量图，默认跟随当前主题的文字颜色 (OnSurface)
-        // 这样在深色模式下会自动变白，浅色模式下变黑
+        // Vector 默认跟随文字颜色
         ColorFilter.tint(MioTheme.colors.onSurface)
     } else {
-        // 如果是照片 (Painter)，默认不加滤镜显示原色
         null
     }
 
-    // --- 小图模式 (正常显示) ---
-    Box(
-        modifier = modifier
-            .size(size)
-            .clip(MioTheme.shapes.cornerMedium) // 使用主题圆角
-            .background(MioTheme.colors.surface) // 背景色跟随主题
-            .clickable(enabled = enableClickToExpand) { isExpanded = true },
-        contentAlignment = Alignment.Center
-    ) {
-        if (painter != null) {
-            Image(
-                painter = painter,
-                contentDescription = contentDescription,
-                contentScale = contentScale,
-                modifier = Modifier.fillMaxSize(),
-                colorFilter = defaultColorFilter // 支持手动 tint
-            )
-        } else if (imageVector != null) {
-            Image(
-                imageVector = imageVector,
-                contentDescription = contentDescription,
-                contentScale = contentScale,
-                modifier = Modifier.fillMaxSize(),
-                colorFilter = defaultColorFilter // 自动适配深色模式
-            )
-        }
+    if (painter != null) {
+        Image(
+            painter = painter,
+            contentDescription = contentDescription,
+            modifier = finalModifier,
+            alignment = alignment,
+            contentScale = contentScale,
+            alpha = alpha,
+            colorFilter = colorFilter // Painter 默认不加 Tint，除非外部指定
+        )
+    } else if (imageVector != null) {
+        Image(
+            imageVector = imageVector,
+            contentDescription = contentDescription,
+            modifier = finalModifier,
+            alignment = alignment,
+            contentScale = contentScale,
+            alpha = alpha,
+            colorFilter = finalColorFilter
+        )
     }
 
     // --- 全屏模式 (Popup 覆盖) ---
@@ -100,7 +103,7 @@ fun MioImage(
             imageVector = imageVector,
             painter = painter,
             contentDescription = contentDescription,
-            originalTint = tint, // 传递手动设置的 tint
+            originalColorFilter = colorFilter,
             onDismiss = { isExpanded = false }
         )
     }
@@ -114,82 +117,56 @@ private fun MioImageFullScreenViewer(
     imageVector: ImageVector?,
     painter: Painter?,
     contentDescription: String?,
-    originalTint: Color?,
+    originalColorFilter: ColorFilter?,
     onDismiss: () -> Unit
 ) {
-    // 缩放比例
     var scale by remember { mutableStateOf(1f) }
-    // 偏移量 (拖拽)
     var offsetX by remember { mutableStateOf(0f) }
     var offsetY by remember { mutableStateOf(0f) }
-
-    // 动画缩放值
     val animatedScale by animateFloatAsState(targetValue = scale)
 
-    // 计算全屏模式下的颜色过滤器
-    val fullScreenColorFilter = if (originalTint != null) {
-        ColorFilter.tint(originalTint) // 如果用户指定了颜色，保持不变
+    // 全屏时，矢量图强制变白，除非原图有滤镜
+    val fullScreenColorFilter = if (originalColorFilter != null) {
+        originalColorFilter
     } else if (imageVector != null) {
-        // 关键修复：全屏背景是黑色的，所以矢量图强制变白，否则看不见
         ColorFilter.tint(Color.White)
     } else {
-        null // 照片保持原色
+        null
     }
 
-    Popup(
-        alignment = Alignment.Center,
-        onDismissRequest = onDismiss
-    ) {
-        // 全屏黑色背景容器 (Lightbox 效果)
-        AnimatedVisibility(
-            visible = true,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
+    Popup(alignment = Alignment.Center, onDismissRequest = onDismiss) {
+        AnimatedVisibility(visible = true, enter = fadeIn(), exit = fadeOut()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.95f)) // 加深背景不透明度
-                    // 1. 处理手势：缩放和拖拽
+                    .background(Color.Black.copy(alpha = 0.95f))
                     .pointerInput(Unit) {
                         detectTransformGestures { _, pan, zoom, _ ->
                             scale = (scale * zoom).coerceIn(1f, 5f)
                             if (scale > 1f) {
-                                val maxTranslateX = (1000f * (scale - 1)) / 2 // 估算边界，简化处理
-                                val maxTranslateY = (1000f * (scale - 1)) / 2
-                                offsetX = (offsetX + pan.x * scale).coerceIn(-maxTranslateX, maxTranslateX)
-                                offsetY = (offsetY + pan.y * scale).coerceIn(-maxTranslateY, maxTranslateY)
+                                val maxTx = (1000f * (scale - 1)) / 2
+                                val maxTy = (1000f * (scale - 1)) / 2
+                                offsetX = (offsetX + pan.x * scale).coerceIn(-maxTx, maxTx)
+                                offsetY = (offsetY + pan.y * scale).coerceIn(-maxTy, maxTy)
                             } else {
-                                offsetX = 0f
-                                offsetY = 0f
+                                offsetX = 0f; offsetY = 0f
                             }
                         }
                     }
-                    // 2. 处理点击
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onTap = { onDismiss() },
                             onDoubleTap = {
-                                if (scale > 1f) {
-                                    scale = 1f
-                                    offsetX = 0f
-                                    offsetY = 0f
-                                } else {
-                                    scale = 2.5f
-                                }
+                                if (scale > 1f) { scale = 1f; offsetX = 0f; offsetY = 0f } else { scale = 2.5f }
                             }
                         )
                     },
                 contentAlignment = Alignment.Center
             ) {
-                // 显示图片
-                val graphicModifier = Modifier
-                    .graphicsLayer(
-                        scaleX = animatedScale,
-                        scaleY = animatedScale,
-                        translationX = offsetX,
-                        translationY = offsetY
-                    )
+                val graphicModifier = Modifier.graphicsLayer(
+                    scaleX = animatedScale, scaleY = animatedScale,
+                    translationX = offsetX, translationY = offsetY
+                )
 
                 if (painter != null) {
                     Image(
@@ -203,23 +180,20 @@ private fun MioImageFullScreenViewer(
                     Image(
                         imageVector = imageVector,
                         contentDescription = contentDescription,
-                        modifier = graphicModifier.size(300.dp), // 矢量图全屏基准大小
+                        modifier = graphicModifier.size(300.dp),
                         contentScale = ContentScale.Fit,
-                        colorFilter = fullScreenColorFilter // 强制变白
+                        colorFilter = fullScreenColorFilter
                     )
                 }
 
-                // 底部提示文字
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 32.dp)
-                ) {
-                    MioText(
-                        text = "双击缩放 / 单击关闭",
-                        color = Color.White.copy(alpha = 0.6f),
-                        style = MioTheme.typography.caption
-                    )
+                Box(modifier = Modifier.align(Alignment.BottomCenter).padding(32.dp)) {
+                    MioTheme(darkTheme = true) { // 强制暗色文字样式
+                        androidx.compose.material3.Text(
+                            text = "双击缩放 / 单击关闭",
+                            color = Color.White.copy(alpha = 0.6f),
+                            style = MioTheme.typography.caption
+                        )
+                    }
                 }
             }
         }

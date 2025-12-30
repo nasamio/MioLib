@@ -2,11 +2,13 @@
 
 package screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -14,6 +16,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.miolib.ui.components.*
 import com.miolib.ui.theme.MioSize
@@ -91,9 +94,46 @@ fun ComponentScreen(
             }
         }
 
-        // --- Part 3: 输入框 ---
+        // --- Part 3: Icon & Image [Update] ---
         MioCard {
-            MioText("3. 输入框", style = MioTheme.typography.titleMedium)
+            MioText("3. 图标与图片", style = MioTheme.typography.titleMedium)
+            Spacer(Modifier.height(16.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // 普通 Icon
+                MioIcon(Icons.Default.Favorite, contentDescription = "Icon")
+                Spacer(Modifier.width(16.dp))
+                // 指定颜色的 Icon
+                MioIcon(Icons.Default.Favorite, contentDescription = "Red Icon", tint = Color.Red)
+                Spacer(Modifier.width(32.dp))
+
+                // [Update] 使用新版 MioImage，开启圆角和点击放大
+                // 原有的背景色效果可以通过 Modifier.background 实现
+                MioImage(
+                    imageVector = Icons.Default.Face,
+                    contentDescription = "Face",
+                    enableClickToExpand = true,
+                    cornerRadius = 8.dp,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .background(MioTheme.colors.surface)
+                )
+                Spacer(Modifier.width(16.dp))
+                // 另一个不同圆角的图片
+                MioImage(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = "Location",
+                    enableClickToExpand = true,
+                    cornerRadius = 40.dp, // 圆形
+                    modifier = Modifier
+                        .size(80.dp)
+                        .background(MioTheme.colors.surface)
+                )
+            }
+        }
+
+        // --- Part 4: 输入框 ---
+        MioCard {
+            MioText("4. 输入框", style = MioTheme.typography.titleMedium)
             Spacer(Modifier.height(16.dp))
             MioInput(
                 value = inputText,
@@ -121,7 +161,7 @@ fun ComponentScreen(
             }
         }
 
-        // --- Part 7: 弹窗 ---
+        // --- Part 6: 弹窗 ---
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             MioButton("打开 Dialog", modifier = Modifier.weight(1f), onClick = { showDialog = true })
             MioButton(
@@ -131,22 +171,11 @@ fun ComponentScreen(
                 contentColor = MioTheme.colors.primary,
                 onClick = { showBottomSheet = true })
         }
-
-        // --- Part 10: 图片 ---
-        MioCard {
-            MioText("10. 图片查看器", style = MioTheme.typography.titleMedium)
-            Spacer(Modifier.height(16.dp))
-            Row {
-                MioImage(imageVector = Icons.Default.Face, size = 80.dp, contentDescription = "Face")
-                Spacer(Modifier.width(16.dp))
-                MioImage(imageVector = Icons.Default.LocationOn, size = 80.dp, cornerRadius = 40.dp)
-            }
-        }
     }
 
     // 弹窗处理
     MioAlertDialog(
-        visible = showDialog, // 这里传入你的状态变量
+        visible = showDialog,
         onDismissRequest = { showDialog = false },
         title = "Mio Dialog",
         text = "对话框组件",
