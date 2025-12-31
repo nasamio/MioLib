@@ -21,14 +21,17 @@ import com.miolib.ui.components.*
 import com.miolib.ui.theme.*
 import kotlinx.coroutines.launch
 import screen.ComponentScreen
-import screen.RssScreen // [新增]
+import screen.RssScreen
+import screen.SettingsScreen
 import screen.SmmsScreen
 
 fun main() {
     application {
         Window(onCloseRequest = ::exitApplication, title = "MioLib Storage Manager") {
             // --- 全局状态 ---
-            var isDarkTheme by remember { mutableStateOf(false) }
+            // [修改] 统一使用 MioThemeStyle 管理所有主题状态 (包含颜色和深浅)
+            var currentStyle by remember { mutableStateOf(MioThemeStyle.Light) }
+
             var useAndroidSize by remember { mutableStateOf(false) }
             var useSquareShape by remember { mutableStateOf(false) }
 
@@ -49,7 +52,8 @@ fun main() {
             }
 
             MioTheme(
-                darkTheme = isDarkTheme,
+                // [修改] 传入当前选中的主题风格
+                style = currentStyle,
                 sizes = currentSizes,
                 shapes = currentShapes
             ) {
@@ -98,9 +102,13 @@ fun main() {
                                     }
                                 },
                                 actions = {
+                                    // [可选] 顶部栏依然可以放一个快捷切换深浅模式的开关，
+                                    // 这里简单实现：如果在浅色系，切到默认深色；如果在深色系，切到默认浅色
                                     MioSwitch(
-                                        checked = isDarkTheme,
-                                        onCheckedChange = { isDarkTheme = it }
+                                        checked = currentStyle.isDark,
+                                        onCheckedChange = { isDark ->
+                                            currentStyle = if (isDark) MioThemeStyle.Dark else MioThemeStyle.Light
+                                        }
                                     )
                                 }
                             )
@@ -122,13 +130,24 @@ fun main() {
                                     onUseAndroidSizeChange = { useAndroidSize = it },
                                     useSquareShape = useSquareShape,
                                     onUseSquareShapeChange = { useSquareShape = it },
-                                    isDarkTheme = isDarkTheme,
-                                    onThemeChange = { isDarkTheme = it }
+                                    isDarkTheme = currentStyle.isDark, // 兼容旧组件参数
+                                    onThemeChange = { isDark ->
+                                        currentStyle = if (isDark) MioThemeStyle.Dark else MioThemeStyle.Light
+                                    }
                                 )
                             }
 
                             composable(Routes.SMMS.route) {
                                 SmmsScreen(snackbarHostState)
+                            }
+
+                            composable(Routes.SETTINGS.route) {
+                                // [修改] 传递新的主题状态
+                                SettingsScreen(
+                                    snackbarHostState = snackbarHostState,
+                                    currentStyle = currentStyle,
+                                    onStyleChange = { currentStyle = it }
+                                )
                             }
                         }
                     }

@@ -1,15 +1,25 @@
 package com.miolib.ui.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,6 +27,54 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.miolib.ui.theme.MioTheme
+
+/**
+ * 内部扩展：统一的设置项交互样式
+ * 处理了 Hover 背景动画、点击波纹绑定
+ */
+@Composable
+private fun Modifier.applySettingItemStyle(
+    onClick: (() -> Unit)? = null,
+    enabled: Boolean = true
+): Modifier {
+    val interactionSource = remember { MutableInteractionSource() }
+
+    // 1. 获取悬停状态
+    val isHovered by interactionSource.collectIsHoveredAsState()
+
+    // 2. 背景色动画
+    val targetColor = if (isHovered && enabled) {
+        MioTheme.colors.onSurface.copy(alpha = 0.05f)
+    } else {
+        Color.Transparent
+    }
+
+    val animatedColor by animateColorAsState(
+        targetValue = targetColor,
+        animationSpec = tween(150)
+    )
+
+    // 3. 组合 Modifier
+    return this
+        .fillMaxWidth()
+        .background(animatedColor)
+        .let { modifier ->
+            if (onClick != null) {
+                modifier.clickable(
+                    interactionSource = interactionSource,
+                    indication = rememberRipple(),
+                    enabled = enabled,
+                    onClick = onClick
+                )
+            } else {
+                modifier.hoverable(
+                    interactionSource = interactionSource,
+                    enabled = enabled
+                )
+            }
+        }
+        .padding(horizontal = 16.dp, vertical = 4.dp)
+}
 
 /**
  * MioSettingCategory: 设置页的分组标题
@@ -38,13 +96,6 @@ fun MioSettingCategory(
 
 /**
  * MioSettingItem: 基础通用设置项
- * 可用于纯文本展示，或者作为“按钮”使用（传入 onClick）
- *
- * @param title 标题
- * @param subtitle 副标题（可选）
- * @param icon 左侧图标（可选）
- * @param trailingContent 右侧自定义内容（可选）
- * @param onClick 点击事件，传 null 则不可点击
  */
 @Composable
 fun MioSettingItem(
@@ -56,12 +107,6 @@ fun MioSettingItem(
     onClick: (() -> Unit)? = null,
     titleColor: Color = MioTheme.colors.onSurface
 ) {
-    val finalModifier = if (onClick != null) {
-        modifier.clickable(onClick = onClick)
-    } else {
-        modifier
-    }
-
     ListItem(
         headlineContent = {
             MioText(
@@ -91,17 +136,14 @@ fun MioSettingItem(
         } else null,
         trailingContent = trailingContent,
         colors = ListItemDefaults.colors(
-            containerColor = Color.Transparent // 背景透明，便于外部容器（如 Card 或 Column）控制
+            containerColor = Color.Transparent
         ),
-        modifier = finalModifier
+        modifier = modifier.applySettingItemStyle(onClick = onClick)
     )
 }
 
 /**
  * MioSettingNavigation: 跳转型设置项
- * 右侧默认带有一个 ">" 箭头，用于进入下一级页面
- *
- * @param info 右侧箭头前的辅助文字（如 WiFi 状态 "已连接"）
  */
 @Composable
 fun MioSettingNavigation(
@@ -140,7 +182,6 @@ fun MioSettingNavigation(
 
 /**
  * MioSettingSwitch: 开关型设置项
- * 右侧显示一个 Switch
  */
 @Composable
 fun MioSettingSwitch(
@@ -157,7 +198,6 @@ fun MioSettingSwitch(
         modifier = modifier,
         subtitle = subtitle,
         icon = icon,
-        // 点击整个条目也能切换开关
         onClick = if (enabled) { { onCheckedChange(!checked) } } else null,
         trailingContent = {
             MioSwitch(
@@ -171,7 +211,9 @@ fun MioSettingSwitch(
 
 /**
  * MioSettingSlider: 拖动调节型设置项
- * 标题和图标在上方，滑块在下方（SupportingContent 位置）
+ * [优化]
+ * 1. 增加了当前数值显示 (百分比)
+ * 2. 优化了布局，将标题和数值放在同一行，视觉更平衡
  */
 @Composable
 fun MioSettingSlider(
@@ -180,18 +222,38 @@ fun MioSettingSlider(
     onValueChange: (Float) -> Unit,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    valueRange: ClosedFloatingPointRange<Float> = 0f..1f
+    valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
+    // [新增] 可选：自定义数值格式化逻辑
+    valueFormatter: ((Float) -> String)? = null
 ) {
+    // 计算显示的数值字符串 (默认显示百分比)
+    val displayValue = valueFormatter?.invoke(value) ?: run {
+        val percent = ((value - valueRange.start) / (valueRange.endInclusive - valueRange.start) * 100).toInt()
+        "$percent%"
+    }
+
     ListItem(
         headlineContent = {
-            MioText(
-                text = title,
-                style = MioTheme.typography.body,
-                fontWeight = FontWeight.Medium
-            )
+            // [修改] 使用 Row 将标题和数值分开排列，两端对齐
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                MioText(
+                    text = title,
+                    style = MioTheme.typography.body,
+                    fontWeight = FontWeight.Medium
+                )
+                MioText(
+                    text = displayValue,
+                    style = MioTheme.typography.body,
+                    fontWeight = FontWeight.Medium,
+                    color = MioTheme.colors.primary // 高亮数值
+                )
+            }
         },
         supportingContent = {
-            // 将 Slider 放在副标题位置，实现上下布局
             MioSlider(
                 value = value,
                 onValueChange = onValueChange,
@@ -211,6 +273,7 @@ fun MioSettingSlider(
         colors = ListItemDefaults.colors(
             containerColor = Color.Transparent
         ),
-        modifier = modifier
+        // 这里 onClick 传 null，但 modifier 依然会处理 Hover 效果
+        modifier = modifier.applySettingItemStyle(onClick = null)
     )
 }

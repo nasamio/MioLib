@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import com.miolib.ui.theme.MioTheme
+import com.miolib.ui.theme.MioThemeStyle
 
 /**
  * MioImage: 通用图片组件 (增强版)
@@ -187,7 +188,8 @@ private fun MioImageFullScreenViewer(
                 }
 
                 Box(modifier = Modifier.align(Alignment.BottomCenter).padding(32.dp)) {
-                    MioTheme(darkTheme = true) { // 强制暗色文字样式
+                    // [修复] 使用新的 MioThemeStyle.Dark 替代已移除的 darkTheme=true 参数
+                    MioTheme(style = MioThemeStyle.Dark) {
                         androidx.compose.material3.Text(
                             text = "双击缩放 / 单击关闭",
                             color = Color.White.copy(alpha = 0.6f),

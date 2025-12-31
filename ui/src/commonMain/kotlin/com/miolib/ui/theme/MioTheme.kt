@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -26,97 +27,168 @@ data class MioColors(
     val onBackground: Color,
     val surface: Color,
     val onSurface: Color,
-    val outline: Color
+    val outline: Color,
+    val isLight: Boolean
 )
 
-// --- Light Mode: Mio Blue (回归你喜欢的静谧蓝) ---
-val LightColors = MioColors(
-    primary = Color(0xFF3B82F6),      // 经典的静谧蓝
-    onPrimary = Color(0xFFFFFFFF),    // 蓝底白字
-    background = Color(0xFFF3F4F6),   // 护眼的淡灰蓝背景
-    onBackground = Color(0xFF111827), // 深灰近黑
-    surface = Color(0xFFFFFFFF),      // 纯白卡片
-    onSurface = Color(0xFF1F2937),    // 卡片文字深灰
-    outline = Color(0xFF9CA3AF)       // 浅灰边框
-)
+// --- 新增：21 种主题风格 ---
+enum class MioThemeStyle(val label: String, val isDark: Boolean) {
+    // === 经典系列 ===
+    Light("默认浅", false),
+    Dark("默认深", true),
 
-// --- Dark Mode: Deep Cyber (修复对比度) ---
-val DarkColors = MioColors(
-    primary = Color(0xFF00E5FF),      // 高亮青色
-    onPrimary = Color(0xFF000000),    // 青底黑字
-    background = Color(0xFF0F172A),   // 午夜深蓝灰
-    onBackground = Color(0xFFF1F5F9), // 亮灰白文字
-    surface = Color(0xFF1E293B),      // 深蓝灰卡片
-    onSurface = Color(0xFF94a3b8),    // 卡片文字灰白
-    outline = Color(0xFF94A3B8),      // 浅灰边框
-)
+    // === 赛博/暗黑系列 ===
+    Cyberpunk("赛博朋克", true), // [New] 强烈的黄黑对比
+    Neon("霓虹紫", true),       // 原 Cyber
+    Obsidian("黑曜石", true),   // 极致纯黑
+    Midnight("午夜蓝", true),
+    Forest("暗夜森", true),
+    Ruby("红宝石", true),
+    Coffee("浓缩咖", true),
+    Slate("岩板灰", true),
 
-// --- 2. 尺寸系统 ---
-@Immutable
-data class MioSizes(
-    val small: SizeSpec,
-    val medium: SizeSpec,
-    val large: SizeSpec
-)
+    // === 清新/明亮系列 ===
+    Sakura("樱花粉", false),
+    Matcha("抹茶绿", false),
+    Ocean("深海蓝", false),     // 虽叫深海，这里做成清爽的深蓝配浅底
+    Sky("天空蓝", false),
+    Mint("薄荷青", false),
+    Lemon("柠檬黄", false),
+    Lavender("薰衣草", false),
+    Sunset("日落橙", false),
+    Grape("葡萄紫", false),     // 浅色底配紫色
+    Peach("蜜桃粉", false),
+    Gold("黑金奢", true)       // 放在最后压轴
+}
 
-@Immutable
-data class SizeSpec(
-    val height: Dp,
-    val padding: Dp,
-    val fontSize: TextUnit,
-    val iconSize: Dp
-)
+// --- 核心：主题颜色工厂 ---
+object MioThemeUtils {
+    fun getColors(style: MioThemeStyle): MioColors {
+        return when (style) {
+            // --- 经典 ---
+            MioThemeStyle.Light -> lightColors(Color(0xFF3B82F6))
+            MioThemeStyle.Dark -> darkColors(Color(0xFF3B82F6))
 
-// --- 3. 形状系统 ---
-@Immutable
-data class MioShapes(
-    val cornerSmall: Shape,
-    val cornerMedium: Shape,
-    val cornerLarge: Shape
-)
+            // --- 赛博/暗黑 ---
+            MioThemeStyle.Cyberpunk -> MioColors(
+                primary = Color(0xFFFCEE0A),      // 赛博黄
+                onPrimary = Color.Black,          // 黄底黑字
+                background = Color(0xFF050505),   // 近乎纯黑
+                onBackground = Color(0xFFFCEE0A), // 文字也是黄色(或白)
+                surface = Color(0xFF1A1A1A),      // 深灰卡片
+                onSurface = Color(0xFFFFFFFF),    // 卡片白字
+                outline = Color(0xFFFCEE0A),      // 黄色边框
+                isLight = false
+            )
+            MioThemeStyle.Neon -> MioColors(
+                primary = Color(0xFFD946EF),
+                onPrimary = Color.White,
+                background = Color(0xFF2E1065),
+                onBackground = Color(0xFFE9D5FF),
+                surface = Color(0xFF4C1D95),
+                onSurface = Color(0xFFE9D5FF),
+                outline = Color(0xFF7C3AED),
+                isLight = false
+            )
+            MioThemeStyle.Obsidian -> MioColors(
+                primary = Color(0xFFFFFFFF),      // 黑白对比
+                onPrimary = Color.Black,
+                background = Color(0xFF000000),   // 纯黑
+                onBackground = Color(0xFFFFFFFF),
+                surface = Color(0xFF121212),
+                onSurface = Color(0xFFE0E0E0),
+                outline = Color(0xFF333333),
+                isLight = false
+            )
+            MioThemeStyle.Midnight -> darkColors(Color(0xFF6366F1), bg = Color(0xFF0F172A), surface = Color(0xFF1E293B))
+            MioThemeStyle.Forest -> darkColors(Color(0xFF10B981), bg = Color(0xFF022C22), surface = Color(0xFF064E3B))
+            MioThemeStyle.Ruby -> darkColors(Color(0xFFF43F5E), bg = Color(0xFF4C0519), surface = Color(0xFF881337))
+            MioThemeStyle.Coffee -> darkColors(Color(0xFFD4A373), bg = Color(0xFF2B2118), surface = Color(0xFF423326))
+            MioThemeStyle.Slate -> darkColors(Color(0xFF94A3B8), bg = Color(0xFF0F172A), surface = Color(0xFF334155))
+            MioThemeStyle.Gold -> darkColors(Color(0xFFFFD700), bg = Color(0xFF1A1A1A), surface = Color(0xFF2C2C2C))
 
-// --- 4. 排版系统 ---
-@Immutable
-data class MioTypography(
-    val display: TextStyle,
-    val titleLarge: TextStyle,
-    val titleMedium: TextStyle,
-    val body: TextStyle,
-    val label: TextStyle,
-    val caption: TextStyle
-)
+            // --- 清新 ---
+            MioThemeStyle.Sakura -> lightColors(Color(0xFFEC4899), bg = Color(0xFFFDF2F8), surface = Color(0xFFFFF1F2))
+            MioThemeStyle.Matcha -> lightColors(Color(0xFF10B981), bg = Color(0xFFF0FDF4), surface = Color(0xFFECFDF5))
+            MioThemeStyle.Ocean -> lightColors(Color(0xFF0EA5E9), bg = Color(0xFFF0F9FF), surface = Color(0xFFE0F2FE))
+            MioThemeStyle.Sky -> lightColors(Color(0xFF38BDF8), bg = Color(0xFFF0F9FF), surface = Color(0xFFE0F2FE))
+            MioThemeStyle.Mint -> lightColors(Color(0xFF2DD4BF), bg = Color(0xFFF0FDFA), surface = Color(0xFFCCFBF1))
+            MioThemeStyle.Lemon -> lightColors(Color(0xFFEAB308), bg = Color(0xFFFEFCE8), surface = Color(0xFFFEF9C3))
+            MioThemeStyle.Lavender -> lightColors(Color(0xFF8B5CF6), bg = Color(0xFFF5F3FF), surface = Color(0xFFEDE9FE))
+            MioThemeStyle.Sunset -> lightColors(Color(0xFFF97316), bg = Color(0xFFFFF7ED), surface = Color(0xFFFFEDD5))
+            MioThemeStyle.Grape -> lightColors(Color(0xFF9333EA), bg = Color(0xFFFAF5FF), surface = Color(0xFFF3E8FF))
+            MioThemeStyle.Peach -> lightColors(Color(0xFFF87171), bg = Color(0xFFFEF2F2), surface = Color(0xFFFEE2E2))
+        }
+    }
+
+    // 辅助函数：快速生成浅色主题
+    private fun lightColors(
+        primary: Color,
+        bg: Color = Color(0xFFF3F4F6),
+        surface: Color = Color(0xFFFFFFFF)
+    ) = MioColors(
+        primary = primary,
+        onPrimary = Color.White,
+        background = bg,
+        onBackground = Color(0xFF111827),
+        surface = surface,
+        onSurface = Color(0xFF1F2937),
+        outline = primary.copy(alpha = 0.5f),
+        isLight = true
+    )
+
+    // 辅助函数：快速生成深色主题
+    private fun darkColors(
+        primary: Color,
+        bg: Color = Color(0xFF0F172A),
+        surface: Color = Color(0xFF1E293B)
+    ) = MioColors(
+        primary = primary,
+        onPrimary = Color.Black, // 深色模式下高亮色按钮通常用黑字
+        background = bg,
+        onBackground = Color(0xFFF1F5F9),
+        surface = surface,
+        onSurface = Color(0xFFE2E8F0),
+        outline = primary.copy(alpha = 0.5f),
+        isLight = false
+    )
+}
+
+// --- 2. 尺寸系统 (保持不变) ---
+@Immutable data class MioSizes(val small: SizeSpec, val medium: SizeSpec, val large: SizeSpec)
+@Immutable data class SizeSpec(val height: Dp, val padding: Dp, val fontSize: TextUnit, val iconSize: Dp)
+
+// --- 3. 形状系统 (保持不变) ---
+@Immutable data class MioShapes(val cornerSmall: Shape, val cornerMedium: Shape, val cornerLarge: Shape)
+
+// --- 4. 排版系统 (保持不变) ---
+@Immutable data class MioTypography(val display: TextStyle, val titleLarge: TextStyle, val titleMedium: TextStyle, val body: TextStyle, val label: TextStyle, val caption: TextStyle)
 
 // --- 预设值配置 ---
-
-// 桌面端尺寸 (紧凑)
 val DesktopSizes = MioSizes(
     small = SizeSpec(28.dp, 10.dp, 12.sp, 14.dp),
     medium = SizeSpec(36.dp, 16.dp, 14.sp, 18.dp),
     large = SizeSpec(44.dp, 24.dp, 16.sp, 22.dp)
 )
 
-// 安卓端尺寸 (触摸友好)
 val AndroidSizes = MioSizes(
     small = SizeSpec(36.dp, 12.dp, 12.sp, 16.dp),
     medium = SizeSpec(48.dp, 20.dp, 16.sp, 24.dp),
     large = SizeSpec(56.dp, 28.dp, 18.sp, 28.dp)
 )
 
-// 形状 (圆润风格)
 val RoundedShapes = MioShapes(
     cornerSmall = RoundedCornerShape(6.dp),
     cornerMedium = RoundedCornerShape(12.dp),
     cornerLarge = RoundedCornerShape(20.dp)
 )
 
-// 形状 (直角风格)
 val SquareShapes = MioShapes(
     cornerSmall = RoundedCornerShape(0.dp),
     cornerMedium = RoundedCornerShape(2.dp),
     cornerLarge = RoundedCornerShape(0.dp)
 )
 
-// 排版规范
 val DefaultTypography = MioTypography(
     display = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Bold, fontSize = 36.sp, lineHeight = 44.sp),
     titleLarge = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Bold, fontSize = 22.sp, lineHeight = 28.sp),
@@ -127,20 +199,20 @@ val DefaultTypography = MioTypography(
 )
 
 // --- CompositionLocal 管道 ---
-val LocalMioColors = staticCompositionLocalOf { LightColors }
+val LocalMioColors = staticCompositionLocalOf { MioThemeUtils.getColors(MioThemeStyle.Light) }
 val LocalMioSizes = staticCompositionLocalOf { DesktopSizes }
 val LocalMioShapes = staticCompositionLocalOf { RoundedShapes }
 val LocalMioTypography = staticCompositionLocalOf { DefaultTypography }
 
 @Composable
 fun MioTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    colors: MioColors = if (darkTheme) DarkColors else LightColors,
+    style: MioThemeStyle = MioThemeStyle.Light,
     sizes: MioSizes = MioTheme.sizes,
     shapes: MioShapes = MioTheme.shapes,
     typography: MioTypography = DefaultTypography,
     content: @Composable () -> Unit
 ) {
+    val colors = remember(style) { MioThemeUtils.getColors(style) }
     CompositionLocalProvider(
         LocalMioColors provides colors,
         LocalMioSizes provides sizes,
