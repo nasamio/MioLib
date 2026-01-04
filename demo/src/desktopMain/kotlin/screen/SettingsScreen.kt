@@ -4,66 +4,30 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.miolib.ui.components.MioAvatar
-import com.miolib.ui.components.MioCard
-import com.miolib.ui.components.MioGridBackground // [New]
-import com.miolib.ui.components.MioIcon
-import com.miolib.ui.components.MioSettingCategory
-import com.miolib.ui.components.MioSettingItem
-import com.miolib.ui.components.MioSettingNavigation
-import com.miolib.ui.components.MioSettingSlider
-import com.miolib.ui.components.MioSettingSwitch
-import com.miolib.ui.components.MioSettingsList
-import com.miolib.ui.components.MioTag
-import com.miolib.ui.components.MioText
+import com.miolib.ui.components.*
 import com.miolib.ui.theme.MioTheme
-import com.miolib.ui.theme.MioThemeStyle
-import com.miolib.ui.theme.MioThemeUtils
+import com.miolib.ui.theme.state.MioThemeStyle
+import com.miolib.ui.theme.state.MioThemeUtils
 import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     MioCard(
         modifier = modifier.fillMaxWidth(),
@@ -81,7 +45,7 @@ fun SettingsCard(
 fun SettingsScreen(
     snackbarHostState: SnackbarHostState,
     currentStyle: MioThemeStyle,
-    onStyleChange: (MioThemeStyle) -> Unit
+    onStyleChange: (MioThemeStyle) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -91,10 +55,9 @@ fun SettingsScreen(
     var volume by remember { mutableStateOf(0.6f) }
     var brightness by remember { mutableStateOf(0.8f) }
 
-    // [New] 控制背景动画的开关 (这里仅仅为了演示，实际使用可以根据需求定死 true)
+    // 控制背景动画的开关 (这里仅仅为了演示，实际使用可以根据需求定死 true)
     var isBackgroundAnimated by remember { mutableStateOf(true) }
 
-    // [New] 使用 MioGridBackground 包裹整个页面
     // 此时背景色由 MioGridBackground 的底色决定 (modifier.background)
     // 而上面的网格线会自动适配当前主题的 Primary 颜色
     MioGridBackground(
@@ -262,7 +225,7 @@ fun SettingsScreen(
 fun ThemeOptionItem(
     style: MioThemeStyle,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     val previewColors = remember(style) { MioThemeUtils.getColors(style) }
 

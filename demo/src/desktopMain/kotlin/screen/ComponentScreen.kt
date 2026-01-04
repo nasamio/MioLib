@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import com.miolib.ui.components.*
 import com.miolib.ui.theme.MioTheme
 import com.miolib.ui.theme.state.MioSize
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 // ==========================================
@@ -46,6 +48,39 @@ fun ComponentScreen(
     var sliderValue by remember { mutableStateOf(0.5f) }
     var showDialog by remember { mutableStateOf(false) }
     var showBottomSheet by remember { mutableStateOf(false) }
+
+    // --- 下载演示状态 ---
+    var downloadState by remember { mutableStateOf<DownloadState>(DownloadState.Idle) }
+    // 模拟下载任务的 Job
+    var downloadJob by remember { mutableStateOf<Job?>(null) }
+
+    // 模拟下载逻辑函数
+    fun startOrResumeDownload() {
+        val currentProgress = (downloadState as? DownloadState.Downloading)?.progress ?: 0f
+        downloadState = DownloadState.Downloading(currentProgress)
+
+        downloadJob?.cancel()
+        downloadJob = scope.launch {
+            var p = currentProgress
+            while (p < 1f) {
+                delay(50) // 模拟网络延迟
+                p += 0.01f
+                // 随机失败模拟 (可选，演示用)
+                // if (p > 0.5f && p < 0.52f && Math.random() > 0.9) {
+                //     downloadState = DownloadState.Error
+                //     return@launch
+                // }
+                downloadState = DownloadState.Downloading(p)
+            }
+            downloadState = DownloadState.Success
+            snackbarHostState.showSnackbar("下载任务完成！")
+        }
+    }
+
+    fun pauseDownload() {
+        downloadJob?.cancel()
+        downloadState = DownloadState.Paused
+    }
 
     Column(
         modifier = Modifier
@@ -94,7 +129,7 @@ fun ComponentScreen(
             }
         }
 
-        // --- Part 3: Icon & Image [Update] ---
+        // --- Part 3: Icon & Image ---
         MioCard {
             MioText("3. 图标与图片", style = MioTheme.typography.titleMedium)
             Spacer(Modifier.height(16.dp))
@@ -106,8 +141,7 @@ fun ComponentScreen(
                 MioIcon(Icons.Default.Favorite, contentDescription = "Red Icon", tint = Color.Red)
                 Spacer(Modifier.width(32.dp))
 
-                // [Update] 使用新版 MioImage，开启圆角和点击放大
-                // 原有的背景色效果可以通过 Modifier.background 实现
+                // [Update] 使用新版 MioImage
                 MioImage(
                     imageVector = Icons.Default.Face,
                     contentDescription = "Face",
@@ -170,6 +204,48 @@ fun ComponentScreen(
                 backgroundColor = MioTheme.colors.surface,
                 contentColor = MioTheme.colors.primary,
                 onClick = { showBottomSheet = true })
+        }
+
+        // --- Part 7: 下载按钮演示 ---
+        MioCard {
+            MioText("7. 智能下载按钮", style = MioTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+            MioText("点击按钮开始模拟下载，支持暂停、断点续传和完成状态。", style = MioTheme.typography.caption, color = MioTheme.colors.outline)
+            Spacer(Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                // 正常尺寸
+                MioDownloadButton(
+                    state = downloadState,
+                    onClick = {
+                        when (downloadState) {
+                            DownloadState.Idle -> startOrResumeDownload()
+                            is DownloadState.Downloading -> pauseDownload()
+                            DownloadState.Paused -> startOrResumeDownload()
+                            DownloadState.Success -> {
+                                // 点击打开，这里演示重置
+                                downloadState = DownloadState.Idle
+                            }
+                            DownloadState.Error -> startOrResumeDownload()
+                        }
+                    }
+                )
+
+                // 演示：强制错误状态
+                MioButton("模拟错误", size = MioSize.Small, backgroundColor = MioTheme.colors.surface, contentColor = Color.Red, onClick = {
+                    pauseDownload()
+                    downloadState = DownloadState.Error
+                })
+
+                // 演示：重置
+                MioButton("重置", size = MioSize.Small, backgroundColor = MioTheme.colors.surface, contentColor = MioTheme.colors.outline, onClick = {
+                    pauseDownload()
+                    downloadState = DownloadState.Idle
+                })
+            }
         }
     }
 

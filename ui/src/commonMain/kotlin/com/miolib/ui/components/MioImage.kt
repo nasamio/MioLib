@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import com.miolib.ui.theme.MioTheme
-import com.miolib.ui.theme.MioThemeStyle
+import com.miolib.ui.theme.state.MioThemeStyle
 
 /**
  * MioImage: 通用图片组件 (增强版)
@@ -52,7 +52,7 @@ fun MioImage(
     colorFilter: ColorFilter? = null,
     // --- 增强功能 ---
     enableClickToExpand: Boolean = false,
-    cornerRadius: Dp = 0.dp
+    cornerRadius: Dp = 0.dp,
 ) {
     // 是否处于全屏查看模式
     var isExpanded by remember { mutableStateOf(false) }
@@ -119,7 +119,7 @@ private fun MioImageFullScreenViewer(
     painter: Painter?,
     contentDescription: String?,
     originalColorFilter: ColorFilter?,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     var scale by remember { mutableStateOf(1f) }
     var offsetX by remember { mutableStateOf(0f) }
@@ -158,7 +158,11 @@ private fun MioImageFullScreenViewer(
                         detectTapGestures(
                             onTap = { onDismiss() },
                             onDoubleTap = {
-                                if (scale > 1f) { scale = 1f; offsetX = 0f; offsetY = 0f } else { scale = 2.5f }
+                                if (scale > 1f) {
+                                    scale = 1f; offsetX = 0f; offsetY = 0f
+                                } else {
+                                    scale = 2.5f
+                                }
                             }
                         )
                     },
@@ -188,7 +192,6 @@ private fun MioImageFullScreenViewer(
                 }
 
                 Box(modifier = Modifier.align(Alignment.BottomCenter).padding(32.dp)) {
-                    // [修复] 使用新的 MioThemeStyle.Dark 替代已移除的 darkTheme=true 参数
                     MioTheme(style = MioThemeStyle.Dark) {
                         androidx.compose.material3.Text(
                             text = "双击缩放 / 单击关闭",

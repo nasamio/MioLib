@@ -19,9 +19,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.miolib.ui.components.*
 import com.miolib.ui.theme.MioTheme
-import com.miolib.ui.theme.MioThemeStyle
 import com.miolib.ui.theme.state.AndroidSizes
 import com.miolib.ui.theme.state.DesktopSizes
+import com.miolib.ui.theme.state.MioThemeStyle
 import com.miolib.ui.theme.state.RoundedShapes
 import com.miolib.ui.theme.state.SquareShapes
 import kotlinx.coroutines.launch
@@ -34,7 +34,7 @@ fun main() {
     application {
         Window(onCloseRequest = ::exitApplication, title = "MioLib Storage Manager") {
             // --- 全局状态 ---
-            // [修改] 统一使用 MioThemeStyle 管理所有主题状态 (包含颜色和深浅)
+            //  统一使用 MioThemeStyle 管理所有主题状态 (包含颜色和深浅)
             var currentStyle by remember { mutableStateOf(MioThemeStyle.Light) }
 
             var useAndroidSize by remember { mutableStateOf(false) }
@@ -147,7 +147,6 @@ fun main() {
                             }
 
                             composable(Routes.SETTINGS.route) {
-                                // [修改] 传递新的主题状态
                                 SettingsScreen(
                                     snackbarHostState = snackbarHostState,
                                     currentStyle = currentStyle,
