@@ -12,8 +12,6 @@
 
 ## ✨ 效果预览 (Demo)
 
-> **✨ 提示**: 请将你的运行效果录屏保存为 GIF 放在 `docs/demo.gif`，截图放在 `docs/screenshot.png`。
-
 ### 🖥️ 桌面端演示
 
 ![Desktop Demo](docs/demo.gif)
@@ -101,7 +99,6 @@ ui库使用:
 ```implementation("com.github.nasamio.MioLib:smms:1.0.3")
 implementation("com.github.nasamio.MioLib:smms:1.0.3")
 ```
-
 
 ## 核心代码示例
 
