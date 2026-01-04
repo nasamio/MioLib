@@ -18,7 +18,6 @@
 
 ### 📱 界面截图
 
-
 |          组件概览          |        主题切换        |       图床管理       |      RSS 阅读      |
 | :------------------------: | :--------------------: | :------------------: | :-----------------: |
 | ![Components](docs/s1.png) | ![Themes](docs/s3.png) | ![SMMS](docs/s2.png) | ![RSS](docs/s4.png) |
@@ -85,18 +84,17 @@ dependencyResolutionManagement {
 			maven { url = uri("https://jitpack.io") } // 添加这一行
 		}
 	}
-
 ```
 
 ui库使用:
 
-```dependencies
-	        implementation("com.github.nasamio.MioLib:ui:1.0.3")
+```
+implementation("com.github.nasamio.MioLib:ui:1.0.3")
 ```
 
 图床库使用：
 
-```implementation("com.github.nasamio.MioLib:smms:1.0.3")
+```
 implementation("com.github.nasamio.MioLib:smms:1.0.3")
 ```
 
@@ -137,3 +135,4 @@ if (response.success) {
     println("上传成功: ${response.data?.url}")
 }
 ```
+
