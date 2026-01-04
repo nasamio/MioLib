@@ -1,6 +1,5 @@
 package com.miolib.ui.components
 
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
@@ -10,21 +9,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import com.miolib.ui.theme.MioSize
 import com.miolib.ui.theme.MioTheme
+import com.miolib.ui.theme.state.MioSize
 
 @Composable
 fun MioInput(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    size: MioSize = MioSize.Medium, // 支持尺寸
+    size: MioSize = MioSize.Medium,
     label: String? = null,
     placeholder: String? = null,
     isError: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
-    singleLine: Boolean = true
+    singleLine: Boolean = true,
 ) {
     // 1. 获取尺寸规范
     val sizeSpec = when (size) {

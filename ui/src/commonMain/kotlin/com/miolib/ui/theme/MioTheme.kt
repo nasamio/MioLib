@@ -1,22 +1,18 @@
 package com.miolib.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.miolib.ui.theme.state.DefaultTypography
+import com.miolib.ui.theme.state.DesktopSizes
+import com.miolib.ui.theme.state.MioShapes
+import com.miolib.ui.theme.state.MioSizes
+import com.miolib.ui.theme.state.MioTypography
+import com.miolib.ui.theme.state.RoundedShapes
 
 // --- 1. 颜色系统 ---
 @Immutable
@@ -28,7 +24,7 @@ data class MioColors(
     val surface: Color,
     val onSurface: Color,
     val outline: Color,
-    val isLight: Boolean
+    val isLight: Boolean,
 )
 
 // --- 新增：21 种主题风格 ---
@@ -80,6 +76,7 @@ object MioThemeUtils {
                 outline = Color(0xFFFCEE0A),      // 黄色边框
                 isLight = false
             )
+
             MioThemeStyle.Neon -> MioColors(
                 primary = Color(0xFFD946EF),
                 onPrimary = Color.White,
@@ -90,6 +87,7 @@ object MioThemeUtils {
                 outline = Color(0xFF7C3AED),
                 isLight = false
             )
+
             MioThemeStyle.Obsidian -> MioColors(
                 primary = Color(0xFFFFFFFF),      // 黑白对比
                 onPrimary = Color.Black,
@@ -100,6 +98,7 @@ object MioThemeUtils {
                 outline = Color(0xFF333333),
                 isLight = false
             )
+
             MioThemeStyle.Midnight -> darkColors(Color(0xFF6366F1), bg = Color(0xFF0F172A), surface = Color(0xFF1E293B))
             MioThemeStyle.Forest -> darkColors(Color(0xFF10B981), bg = Color(0xFF022C22), surface = Color(0xFF064E3B))
             MioThemeStyle.Ruby -> darkColors(Color(0xFFF43F5E), bg = Color(0xFF4C0519), surface = Color(0xFF881337))
@@ -114,7 +113,12 @@ object MioThemeUtils {
             MioThemeStyle.Sky -> lightColors(Color(0xFF38BDF8), bg = Color(0xFFF0F9FF), surface = Color(0xFFE0F2FE))
             MioThemeStyle.Mint -> lightColors(Color(0xFF2DD4BF), bg = Color(0xFFF0FDFA), surface = Color(0xFFCCFBF1))
             MioThemeStyle.Lemon -> lightColors(Color(0xFFEAB308), bg = Color(0xFFFEFCE8), surface = Color(0xFFFEF9C3))
-            MioThemeStyle.Lavender -> lightColors(Color(0xFF8B5CF6), bg = Color(0xFFF5F3FF), surface = Color(0xFFEDE9FE))
+            MioThemeStyle.Lavender -> lightColors(
+                Color(0xFF8B5CF6),
+                bg = Color(0xFFF5F3FF),
+                surface = Color(0xFFEDE9FE)
+            )
+
             MioThemeStyle.Sunset -> lightColors(Color(0xFFF97316), bg = Color(0xFFFFF7ED), surface = Color(0xFFFFEDD5))
             MioThemeStyle.Grape -> lightColors(Color(0xFF9333EA), bg = Color(0xFFFAF5FF), surface = Color(0xFFF3E8FF))
             MioThemeStyle.Peach -> lightColors(Color(0xFFF87171), bg = Color(0xFFFEF2F2), surface = Color(0xFFFEE2E2))
@@ -125,7 +129,7 @@ object MioThemeUtils {
     private fun lightColors(
         primary: Color,
         bg: Color = Color(0xFFF3F4F6),
-        surface: Color = Color(0xFFFFFFFF)
+        surface: Color = Color(0xFFFFFFFF),
     ) = MioColors(
         primary = primary,
         onPrimary = Color.White,
@@ -141,7 +145,7 @@ object MioThemeUtils {
     private fun darkColors(
         primary: Color,
         bg: Color = Color(0xFF0F172A),
-        surface: Color = Color(0xFF1E293B)
+        surface: Color = Color(0xFF1E293B),
     ) = MioColors(
         primary = primary,
         onPrimary = Color.Black, // 深色模式下高亮色按钮通常用黑字
@@ -153,50 +157,6 @@ object MioThemeUtils {
         isLight = false
     )
 }
-
-// --- 2. 尺寸系统 (保持不变) ---
-@Immutable data class MioSizes(val small: SizeSpec, val medium: SizeSpec, val large: SizeSpec)
-@Immutable data class SizeSpec(val height: Dp, val padding: Dp, val fontSize: TextUnit, val iconSize: Dp)
-
-// --- 3. 形状系统 (保持不变) ---
-@Immutable data class MioShapes(val cornerSmall: Shape, val cornerMedium: Shape, val cornerLarge: Shape)
-
-// --- 4. 排版系统 (保持不变) ---
-@Immutable data class MioTypography(val display: TextStyle, val titleLarge: TextStyle, val titleMedium: TextStyle, val body: TextStyle, val label: TextStyle, val caption: TextStyle)
-
-// --- 预设值配置 ---
-val DesktopSizes = MioSizes(
-    small = SizeSpec(28.dp, 10.dp, 12.sp, 14.dp),
-    medium = SizeSpec(36.dp, 16.dp, 14.sp, 18.dp),
-    large = SizeSpec(44.dp, 24.dp, 16.sp, 22.dp)
-)
-
-val AndroidSizes = MioSizes(
-    small = SizeSpec(36.dp, 12.dp, 12.sp, 16.dp),
-    medium = SizeSpec(48.dp, 20.dp, 16.sp, 24.dp),
-    large = SizeSpec(56.dp, 28.dp, 18.sp, 28.dp)
-)
-
-val RoundedShapes = MioShapes(
-    cornerSmall = RoundedCornerShape(6.dp),
-    cornerMedium = RoundedCornerShape(12.dp),
-    cornerLarge = RoundedCornerShape(20.dp)
-)
-
-val SquareShapes = MioShapes(
-    cornerSmall = RoundedCornerShape(0.dp),
-    cornerMedium = RoundedCornerShape(2.dp),
-    cornerLarge = RoundedCornerShape(0.dp)
-)
-
-val DefaultTypography = MioTypography(
-    display = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Bold, fontSize = 36.sp, lineHeight = 44.sp),
-    titleLarge = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Bold, fontSize = 22.sp, lineHeight = 28.sp),
-    titleMedium = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Bold, fontSize = 18.sp, lineHeight = 24.sp),
-    body = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp),
-    label = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 20.sp),
-    caption = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal, fontSize = 12.sp, lineHeight = 16.sp)
-)
 
 // --- CompositionLocal 管道 ---
 val LocalMioColors = staticCompositionLocalOf { MioThemeUtils.getColors(MioThemeStyle.Light) }
@@ -210,7 +170,7 @@ fun MioTheme(
     sizes: MioSizes = MioTheme.sizes,
     shapes: MioShapes = MioTheme.shapes,
     typography: MioTypography = DefaultTypography,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val colors = remember(style) { MioThemeUtils.getColors(style) }
     CompositionLocalProvider(
@@ -230,4 +190,3 @@ object MioTheme {
     val typography: MioTypography @Composable @ReadOnlyComposable get() = LocalMioTypography.current
 }
 
-enum class MioSize { Small, Medium, Large }

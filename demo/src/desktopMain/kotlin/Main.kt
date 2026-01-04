@@ -18,7 +18,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.miolib.ui.components.*
-import com.miolib.ui.theme.*
+import com.miolib.ui.theme.MioTheme
+import com.miolib.ui.theme.MioThemeStyle
+import com.miolib.ui.theme.state.AndroidSizes
+import com.miolib.ui.theme.state.DesktopSizes
+import com.miolib.ui.theme.state.RoundedShapes
+import com.miolib.ui.theme.state.SquareShapes
 import kotlinx.coroutines.launch
 import screen.ComponentScreen
 import screen.RssScreen

@@ -16,8 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import com.miolib.ui.theme.MioSize
 import com.miolib.ui.theme.MioTheme
+import com.miolib.ui.theme.state.MioSize
 
 /**
  * MioButton: 支持多尺寸和自定义形状的按钮
@@ -32,7 +32,7 @@ fun MioButton(
     size: MioSize = MioSize.Medium, // 默认为中等
     enabled: Boolean = true,
     backgroundColor: Color = MioTheme.colors.primary,
-    contentColor: Color = MioTheme.colors.onPrimary
+    contentColor: Color = MioTheme.colors.onPrimary,
 ) {
     // 1. 从 Theme 获取当前的尺寸配置规范
     val sizeSpec = when (size) {

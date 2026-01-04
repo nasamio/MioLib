@@ -19,8 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.miolib.ui.components.*
-import com.miolib.ui.theme.MioSize
 import com.miolib.ui.theme.MioTheme
+import com.miolib.ui.theme.state.MioSize
 import kotlinx.coroutines.launch
 
 // ==========================================
