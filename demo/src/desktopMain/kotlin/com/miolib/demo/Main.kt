@@ -154,6 +154,9 @@ fun main() {
                             composable(Routes.R2.route) {
                                 R2Screen(snackbarHostState)
                             }
+
+                            composable(Routes.KV.route) { CfKvScreen(snackbarHostState) }
+                            composable(Routes.D1.route) { D1Screen(snackbarHostState) }
                         }
                     }
                 }

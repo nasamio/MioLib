@@ -20,6 +20,8 @@ sealed class Routes(
     object RSS : Routes("RSS 阅读", "rss", Icons.Default.List, 3)
     object SETTINGS : Routes("设置", "settings", Icons.Default.Settings, 4)
     object ABOUT : Routes("关于", "about", Icons.Default.AccountBox, 5)
+    object KV : Routes("KV 存储", "kv", Icons.Default.List, -3)
+    object D1 : Routes("D1 存储", "d1", Icons.Default.List, -4)
 
     companion object {
         val all: List<Routes> by lazy {
