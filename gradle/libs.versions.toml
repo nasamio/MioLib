@@ -12,6 +12,9 @@ kotlinx-serialization = "1.7.3"
 # --- 修改这里：将 2.8.0-alpha10 降级为 2.7.0-alpha07 ---
 navigationCompose = "2.7.0-alpha07"
 
+# 新增：Build Config 插件版本
+buildConfig = "5.3.5"
+
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 
@@ -38,3 +41,5 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+# 新增：Build Config 插件
+buildConfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildConfig" }

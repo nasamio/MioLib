@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+package com.miolib.demo
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -17,18 +17,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.miolib.demo.screen.*
 import com.miolib.ui.components.*
 import com.miolib.ui.theme.MioTheme
-import com.miolib.ui.theme.state.AndroidSizes
-import com.miolib.ui.theme.state.DesktopSizes
-import com.miolib.ui.theme.state.MioThemeStyle
-import com.miolib.ui.theme.state.RoundedShapes
-import com.miolib.ui.theme.state.SquareShapes
+import com.miolib.ui.theme.state.*
 import kotlinx.coroutines.launch
-import screen.ComponentScreen
-import screen.RssScreen
-import screen.SettingsScreen
-import screen.SmmsScreen
+import com.miolib.demo.screen.ComponentScreen
+import com.miolib.demo.screen.RssScreen
+import com.miolib.demo.screen.SettingsScreen
+import com.miolib.demo.screen.SmmsScreen
 
 fun main() {
     application {
@@ -152,6 +149,10 @@ fun main() {
                                     currentStyle = currentStyle,
                                     onStyleChange = { currentStyle = it }
                                 )
+                            }
+
+                            composable(Routes.R2.route) {
+                                R2Screen(snackbarHostState)
                             }
                         }
                     }

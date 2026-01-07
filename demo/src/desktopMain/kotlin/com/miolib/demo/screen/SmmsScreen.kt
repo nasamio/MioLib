@@ -1,4 +1,4 @@
-package screen
+package com.miolib.demo.screen
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.input.pointer.pointerInput
@@ -40,6 +41,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.skia.Image
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import java.io.File
@@ -109,7 +111,7 @@ fun SmmsScreen(snackbarHostState: SnackbarHostState) {
         scope.launch {
             try {
                 val bytes = withContext(Dispatchers.IO) { file.readBytes() }
-                val localBitmap = org.jetbrains.skia.Image.makeFromEncoded(bytes).toComposeImageBitmap()
+                val localBitmap = Image.makeFromEncoded(bytes).toComposeImageBitmap()
                 val tempKey = "local_preview_${file.name}_${System.currentTimeMillis()}"
                 SmmsImageCache.bitmapCache[tempKey] = localBitmap
                 val tempItem = SmmsData(filename = file.name, width = 0, height = 0, size = bytes.size, url = tempKey, hash = "temp_${System.currentTimeMillis()}", createdAt = "0")
@@ -387,7 +389,7 @@ fun AsyncNetworkImage(
                     client.downloadImage(url)
                 }
                 if (bytes != null && bytes.isNotEmpty()) {
-                    val bitmap = org.jetbrains.skia.Image.makeFromEncoded(bytes).toComposeImageBitmap()
+                    val bitmap = Image.makeFromEncoded(bytes).toComposeImageBitmap()
                     SmmsImageCache.bitmapCache[url] = bitmap
                     imageBitmap = bitmap
                 } else {
@@ -401,7 +403,7 @@ fun AsyncNetworkImage(
         // [Update] 使用 MioImage (标准模式)
         // 使用 Painter 版本的 MioImage
         MioImage(
-            painter = androidx.compose.ui.graphics.painter.BitmapPainter(imageBitmap!!),
+            painter = BitmapPainter(imageBitmap!!),
             contentDescription = null,
             modifier = modifier,
             contentScale = contentScale,

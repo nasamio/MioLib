@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package screen
+package com.miolib.demo.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

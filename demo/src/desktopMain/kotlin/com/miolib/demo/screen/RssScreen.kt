@@ -1,4 +1,4 @@
-package screen
+package com.miolib.demo.screen
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
@@ -23,6 +23,8 @@ import com.miolib.rss.RssSource
 import com.miolib.ui.components.*
 import com.miolib.ui.theme.MioTheme
 import kotlinx.coroutines.launch
+import java.awt.Desktop
+import java.net.URI
 
 @Composable
 fun RssScreen(snackbarHostState: SnackbarHostState) {
@@ -281,7 +283,7 @@ fun RssReaderView(item: RssItem, onBack: () -> Unit) {
                             text = "在浏览器中打开原文",
                             onClick = {
                                 try {
-                                    java.awt.Desktop.getDesktop().browse(java.net.URI(item.link))
+                                    Desktop.getDesktop().browse(URI(item.link))
                                 } catch (e: Exception) { e.printStackTrace() }
                             },
                             modifier = Modifier.fillMaxWidth()

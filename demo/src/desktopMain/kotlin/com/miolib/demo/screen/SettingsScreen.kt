@@ -1,4 +1,4 @@
-package screen
+package com.miolib.demo.screen
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
